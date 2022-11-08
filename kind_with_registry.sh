@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/bash
 echo "Running $0"
 
 set -o errexit
@@ -6,7 +6,7 @@ set -o errexit
 
 go install sigs.k8s.io/kind@v0.15.0
 
-[[ $(type -P kind) ]] || ( echo "kind is not in PATH" ;  exit 2 )
+[ "$(type -P kind)" ] || ( echo "kind is not in PATH" ;  exit 2 )
 
 
 mkdir -p /tmp/kind_storage
@@ -18,6 +18,7 @@ reg_port='5001'
 if [ "$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)" != 'true' ]; then
   docker run \
     -d --restart=always -p "127.0.0.1:${reg_port}:5000" -e REGISTRY_STORAGE_DELETE_ENABLED=true --name "${reg_name}" \
+     --network bridge \
     registry:2
 fi
 
