@@ -6,6 +6,9 @@ set -o errexit
 
 go install sigs.k8s.io/kind@v0.15.0
 
+[[ $(type -P kind) ]] || ( echo "kind is not in PATH" ;  exit 2 )
+
+
 mkdir -p /tmp/kind_storage
 chmod 777 /tmp/kind_storage
 
