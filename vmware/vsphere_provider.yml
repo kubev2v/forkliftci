@@ -26,4 +26,4 @@ spec:
   settings:
     vddkInitImage: 'quay.io/lrotenbe/vddk:7.0.3'
   type: vsphere
-  url: 'https://vcsim:8989/sdk'
+  url: 'http://vcsim.konveyor-forklift:8989/sdk'

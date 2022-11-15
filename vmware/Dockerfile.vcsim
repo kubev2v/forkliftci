@@ -1,0 +1,14 @@
+FROM centos:stream8
+
+# Expose application port
+EXPOSE 8989
+
+# Copy application from external build
+COPY vcsim /usr/bin/vcsim
+COPY govc /usr/bin/govc
+COPY entrypoint.sh /entrypoint.sh
+COPY cirros-disk.vmdk /tmp/cirros-disk.vmdk
+# Set entrypoint to application with container defaults
+ENTRYPOINT ["bash", "/entrypoint.sh"]
+
+#CMD ["-l", "0.0.0.0:8989", "-tls=false","-api-version=7.0"]

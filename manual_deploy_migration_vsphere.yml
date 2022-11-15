@@ -1,0 +1,81 @@
+
+
+---
+apiVersion: forklift.konveyor.io/v1beta1
+kind: StorageMap
+metadata:
+  name: test-storage-map-v
+  namespace: konveyor-forklift
+spec:
+  map:
+    - destination:
+        storageClass: standard
+      source:
+        name: teststore
+  provider:
+    destination:
+      name: host
+      namespace: konveyor-forklift
+    source:
+      name: vsphere-provider
+      namespace: konveyor-forklift
+
+---
+apiVersion: forklift.konveyor.io/v1beta1
+kind: NetworkMap
+metadata:
+  name: test-network-map-v
+  namespace: konveyor-forklift
+spec:
+  map:
+    - destination:
+        type: pod
+      source:
+        id: network-7
+  provider:
+    destination:
+      name: host
+      namespace: konveyor-forklift
+    source:
+      name: vsphere-provider
+      namespace: konveyor-forklift
+
+---
+apiVersion: forklift.konveyor.io/v1beta1
+kind: Plan
+metadata:
+  name: test-v
+  namespace: konveyor-forklift
+spec:
+  archived: false
+  description: ''
+  map:
+    network:
+      name: test-network-map-v
+      namespace: konveyor-forklift
+    storage:
+      name: test-storage-map-v
+      namespace: konveyor-forklift
+  provider:
+    destination:
+      name: host
+      namespace: konveyor-forklift
+    source:
+      name: vsphere-provider
+      namespace: konveyor-forklift
+  targetNamespace: default
+  vms:
+    - hooks: []
+      name: testvm
+  warm: false
+
+---
+apiVersion: forklift.konveyor.io/v1beta1
+kind: Migration
+metadata:
+  name: test-1664181665570-v
+  namespace: konveyor-forklift
+spec:
+  plan:
+    name: test-v
+    namespace: konveyor-forklift

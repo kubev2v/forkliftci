@@ -1,0 +1,70 @@
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load("@io_bazel_rules_docker//container:container.bzl", "container_push")
+
+http_file(
+    name = "vcenter-govc-tar",
+    downloaded_file_path = "govc.tar.gz",
+    sha256 = "bfad9df590e061e28cfdd2c321583e96abd43e07687980f5897825ec13ff2cb5",
+    urls = [
+        "https://github.com/vmware/govmomi/releases/download/v0.26.1/govc_Linux_x86_64.tar.gz",
+        "https://storage.googleapis.com/builddeps/bfad9df590e061e28cfdd2c321583e96abd43e07687980f5897825ec13ff2cb5",
+    ],
+)  
+
+http_file(
+    name = "vcenter-vcsim-tar",
+    downloaded_file_path = "vcsim.tar.gz",
+    sha256 = "b844f6f7645c870a503aa1c5bd23d9a3cb4f5c850505073eef521f2f22a5f2b7",
+    urls = [
+        "https://github.com/vmware/govmomi/releases/download/v0.26.1/vcsim_Linux_x86_64.tar.gz",
+        "https://storage.googleapis.com/builddeps/b844f6f7645c870a503aa1c5bd23d9a3cb4f5c850505073eef521f2f22a5f2b7",
+    ],
+)
+
+
+container_image(
+    name = "vcenter-simulator",
+    base = "//:testimage_base",
+    cmd = "mkdir -p /opt",
+    directory = "/usr/bin",
+    entrypoint = "/usr/bin/entrypoint.sh",
+    files = [
+        "entrypoint.sh",
+        "@vcenter-govc-tar//file",
+        "@vcenter-vcsim-tar//file",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+container_image(
+    name = "vddk-test-image",
+    entrypoint = "mkdir -p /opt/testing && cp -f /libvddk-test-plugin.so /opt/testing/libvddk-test-plugin.so && mv /cirros.raw /opt/testing/nbdtest.img",
+    files = [
+        ":vddk-test-plugin",
+        "//tests:images/cirros.raw",
+    ],
+    tars = select({
+        "@io_bazel_rules_go//go/platform:linux_arm64": [
+            "//rpm:testimage_aarch64",
+        ],
+        "//conditions:default": [
+            "//rpm:testimage_x86_64",
+        ],
+    }),
+    visibility = ["//visibility:public"],
+)
+
+container_push(
+    name = "vcenter-simulator-push",
+    format = "Docker",
+    image = "vcenter-simulator",
+    registry = "localhost:5001",
+    repository = "vcenter-simulator",
+    tag = "latest",
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "vddk-test-plugin",
+    srcs = ["vddk-test-plugin.c"],
+)
