@@ -1,0 +1,22 @@
+{
+  "vnic_profile": {
+    "name": "ovirtmgmt",
+    "href" : "/ovirt-engine/api/vnicprofiles/b891f46c-9a5c-4f5b-802f-4cc0e3bd6267",
+    "link" : [ {
+      "href" : "/ovirt-engine/api/vnicprofiles/b891f46c-9a5c-4f5b-802f-4cc0e3bd6267/permissions",
+      "rel" : "permissions"
+    } ],
+    "pass_through": {
+      "mode": "disabled"
+    },
+    "port_mirroring": false,
+    "network" : {
+      "href" : "/ovirt-engine/api/networks/6b6b7239-5ea1-4f08-a76e-be150ab8eb89",
+      "id" : "6b6b7239-5ea1-4f08-a76e-be150ab8eb89"
+    },
+    "network_filter" : {
+      "href" : "/ovirt-engine/api/networkfilters/d2370ab4-fee3-11e9-a310-8c1645ce738e",
+      "id" : "d2370ab4-fee3-11e9-a310-8c1645ce738e"
+    }
+  }
+}

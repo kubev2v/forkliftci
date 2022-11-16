@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<nics>
+    <nic href="/ovirt-engine/api/vms/31573c08-717b-43e0-825f-69a36fb0e1a1/nics/1bd6e370-a8f0-4beb-af2e-e94f6bc908d4" id="1bd6e370-a8f0-4beb-af2e-e94f6bc908d4">
+        <actions>
+            <link href="/ovirt-engine/api/vms/31573c08-717b-43e0-825f-69a36fb0e1a1/nics/1bd6e370-a8f0-4beb-af2e-e94f6bc908d4/activate" rel="activate"/>
+            <link href="/ovirt-engine/api/vms/31573c08-717b-43e0-825f-69a36fb0e1a1/nics/1bd6e370-a8f0-4beb-af2e-e94f6bc908d4/deactivate" rel="deactivate"/>
+        </actions>
+        <name>nic1</name>
+        <link href="/ovirt-engine/api/vms/31573c08-717b-43e0-825f-69a36fb0e1a1/nics/1bd6e370-a8f0-4beb-af2e-e94f6bc908d4/reporteddevices" rel="reporteddevices"/>
+        <link href="/ovirt-engine/api/vms/31573c08-717b-43e0-825f-69a36fb0e1a1/nics/1bd6e370-a8f0-4beb-af2e-e94f6bc908d4/networkfilterparameters" rel="networkfilterparameters"/>
+        <link href="/ovirt-engine/api/vms/31573c08-717b-43e0-825f-69a36fb0e1a1/nics/1bd6e370-a8f0-4beb-af2e-e94f6bc908d4/statistics" rel="statistics"/>
+        <vm href="/ovirt-engine/api/vms/31573c08-717b-43e0-825f-69a36fb0e1a1" id="31573c08-717b-43e0-825f-69a36fb0e1a1"/>
+        <interface>virtio</interface>
+        <linked>true</linked>
+        <mac>
+            <address>56:6f:a5:e5:00:03</address>
+        </mac>
+        <plugged>true</plugged>
+        <synced>true</synced>
+        <vnic_profile href="/ovirt-engine/api/vnicprofiles/b891f46c-9a5c-4f5b-802f-4cc0e3bd6267" id="b891f46c-9a5c-4f5b-802f-4cc0e3bd6267"/>
+    </nic>
+</nics>
