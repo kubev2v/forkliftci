@@ -1,0 +1,18 @@
+FROM centos:stream8
+
+# Expose application port
+EXPOSE 8989
+
+# Copy application from external build
+COPY vcsim /usr/bin/vcsim
+COPY govc /usr/bin/govc
+COPY entrypoint_nbdkit.sh /entrypoint_nbdkit.sh
+COPY cirros-disk.vmdk /tmp/cirros-disk.vmdka
+COPY VMware-vix-disklib-7.0.2-17696664.x86_64.tar.gz /opt
+RUN dnf update -y
+RUN dnf install -y  nbdkit nbdkit-vddk-plugin libnbd procps unzip
+RUN cd /opt && tar xvfz VMware-vix-disklib-7.0.2-17696664.x86_64.tar.gz
+# Set entrypoint to application with container defaults
+
+COPY run_test.sh /run_test.sh
+ENTRYPOINT ["bash", "/entrypoint_nbdkit.sh"]
