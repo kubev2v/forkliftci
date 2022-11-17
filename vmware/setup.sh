@@ -1,4 +1,4 @@
-kubectl apply -f ./vmware/vcsim_deployment_http.yml
+kubectl apply -f ./vmware/vcsim_deployment.yml
 
 #wget https://raw.githubusercontent.com/vmware/govmomi/master/Dockerfile.vcsim
 #curl -L -o - https://github.com/vmware/govmomi/releases/latest/download/vcsim_$(uname -s)_$(uname -m).tar.gz | tar -xvzf - vcsim

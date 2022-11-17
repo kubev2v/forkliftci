@@ -8,10 +8,10 @@ metadata:
     createdForResource: vsphere-provider
     createdForResourceType: providers
 data:
-  password: MTIzNDU2Cg==
+  password: cGFzcwo=
   thumbprint: >-
     MkM6MTE6RUQ6RDc6MTM6ODc6N0Q6QjU6NzQ6MTg6Qjg6MUM6NDI6QzI6NTY6MUY6MEQ6Qjk6NUI6Qjk=
-  user: YWRtaW5pc3RyYXRvckB2c3BoZXJlLmxvY2Fs
+  user: dXNlcgo=
 type: Opaque
 ---
 apiVersion: forklift.konveyor.io/v1beta1
@@ -26,4 +26,4 @@ spec:
   settings:
     vddkInitImage: 'quay.io/lrotenbe/vddk:7.0.3'
   type: vsphere
-  url: 'http://vcsim.konveyor-forklift:8989/sdk'
+  url: 'https://vcsim.konveyor-forklift/sdk'

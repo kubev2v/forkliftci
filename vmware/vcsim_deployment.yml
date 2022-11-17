@@ -31,5 +31,5 @@ spec:
   type: ClusterIP
   ports:
   - name: vcsim
-    port: 8989
+    port: 443
     targetPort: 8989
