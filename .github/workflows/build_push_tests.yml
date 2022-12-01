@@ -1,0 +1,39 @@
+name: Build and push tests images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_push:
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: quay.io
+      REGISTRY_TAG: ${{ github.head_ref || github.ref_name }}
+      REGISTRY_ACCOUNT: kubev2v
+    steps:
+      - name: Checkout forklift
+        uses: actions/checkout@v3
+
+      - name: Login to quay.io with bot account
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+
+      - name: Bazel cache
+        id: bazel-cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/bazel
+          key: ${{ runner.os }}-bazel-cache-${{ hashFiles('WORKSPACE') }}
+
+      - run: cd forklift/ && bazel sync --configure
+
+      #this is required by nbdkit plugin compiler
+      - run: sudo apt-get install -y nbdkit-plugin-dev
+
+      - name: Build and push images to quay.io
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          ./build_tests_bazel.sh

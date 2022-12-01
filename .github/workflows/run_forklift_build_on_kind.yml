@@ -33,13 +33,9 @@ jobs:
           path: ~/.cache/bazel
           key: ${{ runner.os }}-bazel-cache
 
-      - run: sudo apt-get install -y nbdkit-plugin-dev
-
       - name: Get kubectl
         run: curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
       - run: chmod u+x kubectl
-
-      - run: cd forklift/ && bazel sync --configure
 
       - run: build_and_setup_everything_bazel.sh
 
