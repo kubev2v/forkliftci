@@ -74,6 +74,9 @@ Run the script [k8s-deploy-kubevirt.sh](k8s-deploy-kubevirt.sh) to deploy
 kubevirt and everything it needs to the new cluster.
 This can also take a moment.
 
+# Install cert-manager
+Run the script [k8s-deploy-cert-manager.sh](k8s-deploy-cert-manager.sh) to
+deploy [cert-manager](https://cert-manager.io).
 
 # Set Permissions
 

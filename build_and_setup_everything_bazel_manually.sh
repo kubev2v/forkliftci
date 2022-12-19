@@ -6,6 +6,8 @@
 
 ./k8s-deploy-kubevirt.sh
 
+./k8s-deploy-cert-manager.sh
+
 ./build_forklift_bazel.sh
 
 ./deploy_local_forklift_bazel.sh
