@@ -18,6 +18,7 @@ cd ${FORKLIFT_DIR:-forklift}
 [ ! -e "${SCRIPT_DIR}/stub-images" ] && { echo "stub-images not found";exit 2; }
 
 export REGISTRY_TAG=latest
+export USE_BAZEL_VERSION=5.4.0
 
 # Copy the stub-images under the bazel workspace
 cp -fr ${SCRIPT_DIR}/stub-images .
