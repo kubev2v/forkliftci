@@ -1,3 +1,7 @@
+#!/bin/bash
+
+set -ex
+
 kubectl apply -f ./vmware/vcsim_deployment.yml
 
 while ! kubectl get deployment -n konveyor-forklift vcsim; do sleep 5; done

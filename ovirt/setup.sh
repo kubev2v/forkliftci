@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/bin/bash
+
+set -ex
 
 kubectl apply -f ovirt/patch.yml
 
