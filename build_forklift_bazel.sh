@@ -18,7 +18,6 @@ cd ${FORKLIFT_DIR:-forklift}
 export REGISTRY=localhost:5001
 export REGISTRY_TAG=latest
 export REGISTRY_ACCOUNT=""
-export USE_BAZEL_VERSION=5.4.0
 
 bazel run push-forklift-api
 bazel run push-forklift-controller

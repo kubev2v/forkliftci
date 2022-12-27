@@ -13,6 +13,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      USE_BAZEL_VERSION: 5.4.0
     steps:
       - name: Check out forkliftci repository
         uses: actions/checkout@v3
