@@ -20,6 +20,9 @@ spec:
         ports:
         - containerPort: 80
         command: ["/app/entrypoint.py", "/images/cirros.raw", "--ticket-id", "cirros"]
+        resources:
+            requests:
+              cpu: 100m
 
 ---
 apiVersion: v1
