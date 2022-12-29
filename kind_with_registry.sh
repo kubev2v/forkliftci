@@ -9,8 +9,8 @@ go install sigs.k8s.io/kind@v0.15.0
 [ "$(type -P kind)" ] || ( echo "kind is not in PATH" ;  exit 2 )
 
 
-mkdir -p /tmp/kind_storage
-chmod 777 /tmp/kind_storage
+mkdir -p /var/tmp/kind_storage
+chmod 777 /var/tmp/kind_storage
 
 # create registry container unless it already exists
 reg_name='kind-registry'
@@ -29,7 +29,7 @@ apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
   extraMounts:
-    - hostPath: /tmp/kind_storage
+    - hostPath: /var/tmp/kind_storage
       containerPath: /data
 containerdConfigPatches:
 - |-

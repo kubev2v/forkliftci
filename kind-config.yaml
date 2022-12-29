@@ -3,7 +3,7 @@ kind: Cluster
 nodes:
   - role: control-plane
     extraMounts:
-      - hostPath: /tmp/kind_storage
+      - hostPath: /var/tmp/kind_storage
         containerPath: /data
     extraPortMappings:
     - containerPort: 30001
