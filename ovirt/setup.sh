@@ -4,9 +4,6 @@ set -ex
 
 kubectl apply -f ovirt/patch.yml
 
-docker build ovirt/ -t localhost:5001/fakeovirt
-docker push localhost:5001/fakeovirt
-
 docker build ovirt-imageio/ -t localhost:5001/imageio
 docker push localhost:5001/imageio
 

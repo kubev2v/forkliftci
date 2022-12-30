@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<disk_profiles>
-    <disk_profile href="/ovirt-engine/api/storagedomains/95ef6fee-5773-46a2-9340-a636958a96b8/diskprofiles/0f9c5266-0192-4127-897f-b297cf6c8e04" id="0f9c5266-0192-4127-897f-b297cf6c8e04">
-        <name>test</name>
-        <link href="/ovirt-engine/api/storagedomains/95ef6fee-5773-46a2-9340-a636958a96b8/diskprofiles/0f9c5266-0192-4127-897f-b297cf6c8e04/permissions" rel="permissions"/>
-        <storage_domain href="/ovirt-engine/api/storagedomains/95ef6fee-5773-46a2-9340-a636958a96b8" id="95ef6fee-5773-46a2-9340-a636958a96b8"/>
-    </disk_profile>
-</disk_profiles>

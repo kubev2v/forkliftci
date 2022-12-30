@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: fakeovirt
-        image: localhost:5001/fakeovirt:latest
+        image: quay.io/kubev2v/fakeovirt:latest
         ports:
         - containerPort: 30001
         env:
