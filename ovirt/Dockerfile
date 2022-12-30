@@ -1,4 +1,4 @@
-FROM quay.io/mnecas0/fakeovirt:latest
+FROM quay.io/kubev2v/fakeovirt:latest
 
 WORKDIR /app
 
