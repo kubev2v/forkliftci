@@ -33,4 +33,5 @@ spec:
   inventory_container_requests_cpu: "50m"
   validation_container_requests_cpu: "50m"
   controller_container_requests_cpu: "50m"
+  api_container_requests_cpu: "50m"
 EOF
