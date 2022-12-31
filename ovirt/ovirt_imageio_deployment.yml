@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: imageio
+  name: ovirt-imageio
   namespace: konveyor-forklift
 spec:
   replicas: 1
@@ -25,7 +25,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: imageio
+  name: ovirt-imageio
   namespace: konveyor-forklift
 spec:
   selector:
