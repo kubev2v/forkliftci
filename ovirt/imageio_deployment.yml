@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: imageio
-        image: localhost:5001/imageio:latest
+        image: quay.io/kubev2v/ovirt-imageio-server:latest
         ports:
         - containerPort: 80
         command: ["/app/entrypoint.py", "/images/cirros.raw", "--ticket-id", "cirros"]
