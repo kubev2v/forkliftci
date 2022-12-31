@@ -30,7 +30,7 @@ spec:
   feature_must_gather_api: false
   must_gather_api_tls_enabled: false
   ui_tls_enabled: false
-  inventory_container_requests_cpu: "200m"
-  validation_container_requests_cpu: "300m"
-  controller_container_requests_cpu: "100m" 
+  inventory_container_requests_cpu: "50m"
+  validation_container_requests_cpu: "50m"
+  controller_container_requests_cpu: "50m"
 EOF
