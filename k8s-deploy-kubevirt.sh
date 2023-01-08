@@ -3,8 +3,7 @@
 set -ex
 
 # Install CDI
-LATEST_CDI=$(curl -s https://api.github.com/repos/kubevirt/containerized-data-importer/releases/latest)
-export CDI_VERSION=$(jq -r .tag_name <<< $LATEST_CDI)
+[ ! -v CDI_VERSION ] && export CDI_VERSION=v1.55.2
 kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/$CDI_VERSION/cdi-operator.yaml
 kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/$CDI_VERSION/cdi-cr.yaml
 

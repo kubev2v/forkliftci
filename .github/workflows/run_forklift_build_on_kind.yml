@@ -39,7 +39,11 @@ jobs:
         run: curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
       - run: chmod u+x kubectl
 
-      - run: build_and_setup_everything_bazel.sh
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export CDI_VERSION=$(gh api repos/kubevirt/containerized-data-importer/releases/latest | jq -r ".tag_name")
+          build_and_setup_everything_bazel.sh
 
       - run: kubectl version
 

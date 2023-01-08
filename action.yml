@@ -26,7 +26,10 @@ runs:
 
     - name: Build and setup everything with bazel
       shell: bash
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        export CDI_VERSION=$(gh api repos/kubevirt/containerized-data-importer/releases/latest | jq -r ".tag_name")
         cd ${{ github.action_path }}
         FORKLIFT_DIR=$GITHUB_WORKSPACE build_and_setup_everything_bazel.sh
         cd -
