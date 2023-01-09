@@ -27,12 +27,14 @@ runs:
       shell: bash
       run: curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && chmod u+x kubectl
 
+    - name: Set latest version of CDI
+      run: |
+        echo "CDI_VERSION=$(gh api repos/kubevirt/containerized-data-importer/releases/latest | jq -r .tag_name)" >> $GITHUB_ENV
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Build and setup everything with bazel
       shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.gh_access_token }}
       run: |
-        export CDI_VERSION=$(gh api repos/kubevirt/containerized-data-importer/releases/latest | jq -r ".tag_name")
         cd ${{ github.action_path }}
         FORKLIFT_DIR=$GITHUB_WORKSPACE build_and_setup_everything_bazel.sh
         cd -
