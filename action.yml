@@ -1,6 +1,9 @@
 ---
 name: Setup forkliftci env
 description: Build and setup the forkliftci env with kind
+inputs:
+  gh_access_token:
+    description: 'Access token that is used to access CDI repository'
 runs:
   using: composite
   steps:
@@ -27,7 +30,7 @@ runs:
     - name: Build and setup everything with bazel
       shell: bash
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ inputs.gh_access_token }}
       run: |
         export CDI_VERSION=$(gh api repos/kubevirt/containerized-data-importer/releases/latest | jq -r ".tag_name")
         cd ${{ github.action_path }}
