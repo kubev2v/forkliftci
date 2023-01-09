@@ -31,7 +31,7 @@ runs:
       run: |
         echo "CDI_VERSION=$(gh api repos/kubevirt/containerized-data-importer/releases/latest | jq -r .tag_name)" >> $GITHUB_ENV
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ inputs.gh_access_token }}
     - name: Build and setup everything with bazel
       shell: bash
       run: |
