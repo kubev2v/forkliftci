@@ -2,7 +2,7 @@
 echo "Running $0"
 
 set -o errexit
-
+[ -z "${REMOTE_DOCKER_HOST}" ] || . ./setup_remote_docker_kind.sh
 
 go install sigs.k8s.io/kind@v0.15.0
 
@@ -41,6 +41,8 @@ EOF
 if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
   docker network connect "kind" "${reg_name}"
 fi
+
+[ -z "${REMOTE_DOCKER_HOST}" ] || { setup_kind_sshtunnel  ; trap cleanup_kind_sshtunnel ERR ;  } 
 
 # Document the local registry
 # https://github.com/kubernetes/enhancements/tree/master/keps/sig-cluster-lifecycle/generic/1755-communicating-a-local-registry

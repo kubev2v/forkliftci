@@ -7,8 +7,6 @@
 
 . ./kind_with_registry.sh
 
-[[ -z "${REMOTE_DOCKER_HOST}" ]] || { setup_kind_sshtunnel  ; trap cleanup_kind_sshtunnel ERR ;  } 
-
 ./get_forklift_bazel.sh
 
 ./k8s-deploy-kubevirt.sh
