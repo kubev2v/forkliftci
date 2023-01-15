@@ -16,7 +16,7 @@ kubectl apply -f forklift-operator/forklift-k8s.yaml
 while ! kubectl get deployment -n konveyor-forklift forklift-operator; do sleep 10; done
 kubectl wait deployment -n konveyor-forklift forklift-operator --for condition=Available=True --timeout=180s
 
-cat << EOF | kubectl -n konveyor-forklift apply -f -
+cat << EOF | kubectl apply -f -
 apiVersion: forklift.konveyor.io/v1beta1
 kind: ForkliftController
 metadata:
