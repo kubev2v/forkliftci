@@ -36,6 +36,4 @@ runs:
     - name: Build and setup everything with bazel
       shell: bash
       run: |
-        cd ${{ github.action_path }}
-        FORKLIFT_DIR=$GITHUB_WORKSPACE build_and_setup_everything_bazel.sh
-        cd -
+        (cd ${{ github.action_path }}; FORKLIFT_DIR=$GITHUB_WORKSPACE build_and_setup_everything_bazel.sh)
