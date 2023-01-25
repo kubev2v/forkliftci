@@ -4,6 +4,9 @@ description: Build and setup the forkliftci env with kind
 inputs:
   gh_access_token:
     description: 'Access token that is used to access CDI repository'
+outputs:
+  cluster: ${{ steps.kind-outputs.outputs.cluster }}
+  token: ${{ steps.kind-outputs.outputs.token }}
 runs:
   using: composite
   steps:
@@ -33,7 +36,13 @@ runs:
         echo "CDI_VERSION=$(gh api repos/kubevirt/containerized-data-importer/releases/latest | jq -r .tag_name)" >> $GITHUB_ENV
       env:
         GH_TOKEN: ${{ inputs.gh_access_token }}
+
     - name: Build and setup everything with bazel
       shell: bash
       run: |
         (cd ${{ github.action_path }}; FORKLIFT_DIR=$GITHUB_WORKSPACE build_and_setup_everything_bazel.sh)
+
+    - id: kind-outputs
+      run: |
+        echo "cluster=`kind get kubeconfig | grep server | cut -d ' ' -f6`" >> $GITHUB_OUTPUT
+        echo "token=`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-id}' | base64 -d`.`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-secret}' | base64 -d`" >> $GITHUB_OUTPUT
