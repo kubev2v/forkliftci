@@ -5,8 +5,10 @@ inputs:
   gh_access_token:
     description: 'Access token that is used to access CDI repository'
 outputs:
-  cluster: ${{ steps.kind-outputs.outputs.cluster }}
-  token: ${{ steps.kind-outputs.outputs.token }}
+  cluster:
+    value: ${{ steps.kind-outputs.outputs.cluster }}
+  token:
+    value: ${{ steps.kind-outputs.outputs.token }}
 runs:
   using: composite
   steps:
