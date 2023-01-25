@@ -37,6 +37,8 @@ containerdConfigPatches:
     endpoint = ["http://${reg_name}:5000"]
 EOF
 
+kind get kubeconfig > /tmp/kubeconfig
+
 # connect the registry to the cluster network if not already connected
 if [ "$(docker inspect -f='{{json .NetworkSettings.Networks.kind}}' "${reg_name}")" = 'null' ]; then
   docker network connect "kind" "${reg_name}"

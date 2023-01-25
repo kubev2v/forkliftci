@@ -6,6 +6,7 @@ mkdir -p /var/tmp/kind_storage
 chmod 777 /var/tmp/kind_storage
 
 kind create cluster --config kind-config.yaml
+kind get kubeconfig > /tmp/kubeconfig
 
 kubectl apply -f add_pv.yml
 
