@@ -45,6 +45,7 @@ runs:
         (cd ${{ github.action_path }}; FORKLIFT_DIR=$GITHUB_WORKSPACE build_and_setup_everything_bazel.sh)
 
     - id: kind-outputs
+      shell: bash
       run: |
         echo "cluster=`kind get kubeconfig | grep server | cut -d ' ' -f6`" >> $GITHUB_OUTPUT
         echo "token=`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-id}' | base64 -d`.`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-secret}' | base64 -d`" >> $GITHUB_OUTPUT
