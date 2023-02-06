@@ -46,8 +46,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: build_and_setup_everything_bazel.sh
 
-      - run: openstack/run_packstack_docker.sh
-
       - run: kubectl version
 
       - run: kubectl wait deployment -n konveyor-forklift forklift-controller --for condition=Available=True --timeout=180s

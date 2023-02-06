@@ -31,6 +31,9 @@ nodes:
   extraMounts:
     - hostPath: /var/tmp/kind_storage
       containerPath: /data
+  extraPortMappings:
+    - containerPort: 30050
+      hostPort: 30050    
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]

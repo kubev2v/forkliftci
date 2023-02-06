@@ -21,6 +21,8 @@
 
 ./ovirt/setup.sh
 
+./openstack/setup.sh
+
 . ./grant_permissions.sh
 
 echo "CLUSTER=$CLUSTER"
