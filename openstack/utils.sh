@@ -47,6 +47,12 @@ kubectl exec -n ${namespace_name} -i deploy/packstack -- bash /test.sh
 }
 
 
+function get_keystonerc {
+    localpath=$1
+    
+    kubectl cp  ${namespace_name}/$(echo_pod_name):/root/keystonerc_admin ${localpath}
+}
+
 
 
 function run_command_deployment {

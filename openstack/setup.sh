@@ -11,4 +11,12 @@ source openstack/utils.sh
 run_command_deployment healthcheck
 run_command_deployment bash /create-cirros.sh
 sleep 2
-openstack_pod server list
+
+# get the VM id and source it
+OS_VM_ID=$(openstack_pod server list -c ID -f value)
+export OS_VM_ID
+
+# get the environment file from kind and source it
+get_keystonerc "/tmp/e2e_env_vars.sh"
+. /tmp/e2e_env_vars.sh
+
