@@ -31,18 +31,28 @@ spec:
         - containerPort: 9292
         - name: neutron-port
           containerPort: 9696
+        volumeMounts:
+        - mountPath: /lib/modules
+          name: kernel-modules
         startupProbe:
           httpGet:
             path: /
             port: 9696
           failureThreshold: 30
           periodSeconds: 10
-
         env:
+          - name: EXTERNAL_IP
+            value: <set_external_ip>
           - name: NAMESPACE
             value: konveyor-forklift
           - name: PORT
             value: "30001"
+      volumes:
+      - name: kernel-modules
+        hostPath:
+          path: /lib/modules
+          # this field is optional
+          type: Directory
 
 ---
 apiVersion: v1

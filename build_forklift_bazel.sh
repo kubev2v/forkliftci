@@ -1,7 +1,8 @@
 #!/bin/sh
 echo "Running $0"
 
-set -ex
+set -e
+
 SCRIPT_PATH=`realpath "$0"`
 SCRIPT_DIR=`dirname "$SCRIPT_PATH"`
 

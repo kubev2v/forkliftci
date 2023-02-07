@@ -2,14 +2,27 @@
 
 set -ex
 
+export ext_ip=$(ip route get 8.8.8.8 | awk '{ print $7 }' | head -1)
+# set the EXTERNAL_IP env for the packstack container,its needed for accessing the NFS.
+sed -i "s/<set_external_ip>/${ext_ip}/g" openstack/packstack_deployment.yml
+
+
 kubectl apply -f openstack/packstack_deployment.yml
-
 while ! kubectl get deployment -n konveyor-forklift packstack; do sleep 10; done
-kubectl wait deployment -n konveyor-forklift packstack --for condition=Available=True --timeout=180s
+kubectl wait deployment -n konveyor-forklift packstack --for condition=Available=True --timeout=280s
 
+sleep 5
 source openstack/utils.sh
 run_command_deployment healthcheck
-run_command_deployment bash /create-cirros.sh
+
+# workaround for unable to attaching volume to a VM (missing mount for nova)
+run_command_deployment fix_nova_mount
+
+# create cirros VM instance using glance only
+run_command_deployment packstack_create_cirros
+
+# create volume (cinder) from image and start vm from it
+run_command_deployment packstack_create_cirros_volume
 sleep 2
 
 # get the VM id and source it
