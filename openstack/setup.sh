@@ -13,23 +13,6 @@ kubectl wait deployment -n konveyor-forklift packstack --for condition=Available
 
 sleep 5
 source openstack/utils.sh
-run_command_deployment healthcheck
-
 # workaround for unable to attaching volume to a VM (missing mount for nova)
 run_command_deployment fix_nova_mount
-
-# create cirros VM instance using glance only
-run_command_deployment packstack_create_cirros
-
-# create volume (cinder) from image and start vm from it
-run_command_deployment packstack_create_cirros_volume
-sleep 2
-
-# get the VM id and source it
-OS_VM_ID=$(openstack_pod server list -c ID -f value)
-export OS_VM_ID
-
-# get the environment file from kind and source it
-get_keystonerc "/tmp/e2e_env_vars.sh"
-. /tmp/e2e_env_vars.sh
-
+run_command_deployment healthcheck

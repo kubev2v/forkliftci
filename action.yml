@@ -4,6 +4,8 @@ description: Build and setup the forkliftci env with kind
 inputs:
   gh_access_token:
     description: 'Access token that is used to access CDI repository'
+  provider_name:
+    description: 'specify which provider do we need to test'
 outputs:
   cluster:
     value: ${{ steps.kind-outputs.outputs.cluster }}
@@ -12,6 +14,10 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: print passed provider name
+      run: echo ${{ inputs.provider_name }}  
+      shell: bash
+
     - name: Checkout forklift
       uses: actions/checkout@v3
       with:
@@ -43,6 +49,9 @@ runs:
       shell: bash
       run: |
         (cd ${{ github.action_path }}; FORKLIFT_DIR=$GITHUB_WORKSPACE build_and_setup_everything_bazel.sh)
+      
+      env:
+        PROVIDER_NAME: ${{ inputs.provider_name }}
 
     - id: kind-outputs
       shell: bash
