@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: packstack
-        image: quay.io/eslutsky/packstack:latest
+        image: quay.io/kubev2v/packstack:latest
         securityContext:        
           privileged: true
           runAsUser: 0

@@ -56,6 +56,7 @@ spec:
   config: '{}'
 EOF
 
+
 echo CDI:  $CDI_VERSION
 echo CNA:  $CNA_VERSION
 echo Virt: $VIRT_VERSION
