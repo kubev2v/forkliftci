@@ -60,7 +60,7 @@ data:
     help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 EOF
 
-kubectl apply -f add_pv.yml
+kubectl apply -f cluster/manifests/add_pv.yaml
 
 export CLUSTER=`kind get kubeconfig | grep server | cut -d ' ' -f6`
 export NODE_IP=`kubectl get nodes -o wide | grep control-plane | awk '{print $6}'`

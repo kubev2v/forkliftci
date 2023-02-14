@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vcsim
+  namespace: konveyor-forklift
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vcsim
+  template:
+    metadata:
+      labels:
+        app: vcsim
+    spec:
+      containers:
+      - name: vcsim
+        image: docker.io/vmware/vcsim:latest
+        ports:
+        - containerPort: 8989
+      - name: govc
+        image: quay.io/eslutsky/vcsim_debug:latest
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vcsim
+  namespace: konveyor-forklift
+spec:
+  selector:
+    app: vcsim
+  type: ClusterIP
+  ports:
+  - name: vcsim
+    port: 8989
+    targetPort: 8989

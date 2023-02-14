@@ -10,7 +10,7 @@ while ! kubectl get deployment -n olm olm-operator; do sleep 10; done
 kubectl wait deployment -n olm olm-operator --for condition=Available=True --timeout=180s
 
 # Deploy operator
-kubectl apply -f forklift-k8s.yaml
+kubectl apply -f cluster/manifests/forklift-k8s.yaml
 
 # Wait for forklift operator to start, and create a controller instance
 while ! kubectl get deployment -n konveyor-forklift forklift-operator; do sleep 10; done

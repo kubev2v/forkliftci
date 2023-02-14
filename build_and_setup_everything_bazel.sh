@@ -1,48 +1,49 @@
-#!/bin/sh
+#!/bin/bash
 
 # if none is provided set to all by default
 [ ! -z "${PROVIDER_NAME}" ] || PROVIDER_NAME="all"
 
-. ./kind_with_registry.sh
+. ./cluster/kind/kind_with_registry.sh
 
-./k8s-deploy-kubevirt.sh
+./cluster/k8s-deploy-kubevirt.sh
 
-./k8s-deploy-cert-manager.sh
+./cluster/k8s-deploy-cert-manager.sh
 
+# build forklift and push to local registry
 ./build_forklift_bazel.sh
 
-./deploy_local_forklift_bazel.sh
+./cluster/deploy_local_forklift_bazel.sh
 
 case $PROVIDER_NAME in
 
   "all")
     echo "installing all providers"
-    ./vmware/setup.sh
-    ./ovirt/setup.sh
-    ./openstack/install_nfs.sh
-    ./openstack/setup.sh
-    ./openstack/create_test_vms.sh
+    ./cluster/providers/vmware/setup.sh
+    ./cluster/providers/ovirt/setup.sh
+    ./cluster/providers/openstack/install_nfs.sh
+    ./cluster/providers/openstack/setup.sh
+    ./cluster/providers/openstack/create_test_vms.sh
 
     ;;
   "vsphere")
     echo "installing vsphere providers"
-    ./vmware/setup.sh
+    ./cluster/providers/vmware/setup.sh
     ;;
   "ovirt")
     echo "installing ovirt providers" 
-    ./ovirt/setup.sh
+    ./cluster/providers/ovirt/setup.sh
     ;;  
   "openstack")
     echo "installing openstack providers" 
       
     #installs nfs for CSI and opentack volumes
-    ./openstack/install_nfs.sh
+    ./cluster/providers/openstack/install_nfs.sh
 
     #create openstack - packstack deployment
-    ./openstack/setup.sh
+    ./cluster/providers/openstack/setup.sh
 
     #create sample VMs and volume disks for the tests
-    ./openstack/create_test_vms.sh
+    ./cluster/providers/openstack/create_test_vms.sh
     ;;
   *) 
     echo "provider ${PROVIDER_NAME} set incorrectly"
@@ -50,7 +51,13 @@ case $PROVIDER_NAME in
     ;;
 esac
 
-. ./grant_permissions.sh
+source ./cluster/common.sh 
+
+# grant admin rights so its token can be used to access the API
+k8s_grant_permissions
+
+# pactch StorageProfile with ReadWriteOnce Access
+k8s_patch_storage_profile
 
 echo "CLUSTER=$CLUSTER"
 echo "TOKEN=$TOKEN"

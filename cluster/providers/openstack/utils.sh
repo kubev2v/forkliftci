@@ -79,7 +79,7 @@ function get_keystonerc {
 function run_command_deployment {
         command=$@
     
-    kubectl cp openstack/utils.sh  ${namespace_name}/$(echo_pod_name):/utils.sh
+    kubectl cp cluster/providers/openstack/utils.sh  ${namespace_name}/$(echo_pod_name):/utils.sh
     kubectl exec -n ${namespace_name} -i deploy/packstack -- bash<<EOF
 source /utils.sh
 $command
@@ -87,7 +87,7 @@ EOF
 }
 function run_command {
     command=$@
-    docker cp openstack/utils.sh ${container_name}:/utils.sh 
+    docker cp cluster/providers/openstack/utils.sh ${container_name}:/utils.sh 
     docker exec -i ${container_name} bash<<EOF
 source /utils.sh
 $command

@@ -10,31 +10,34 @@ jobs:
     steps:
       - name: Check out forkliftci repository
         uses: actions/checkout@v3
+
       - run: echo "💡 The repository has been cloned to the runner."
 
       - name: List files in the repository
         run: |
           ls ${{ github.workspace }}
+
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
       - run: echo `pwd` >> $GITHUB_PATH
 
-      - run: install_kind.sh
+      - run: cluster/kind/install_kind.sh
 
       - name: Get kubectl
         run: curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
       - run: chmod u+x kubectl
+
       - run: kubectl version
 
-      - run: k8s-deploy-forklift.sh
+      - run: cluster/k8s-deploy-kubevirt.sh
 
-      - run: k8s-deploy-kubevirt.sh
-
-      - run: grant_permissions.sh
+      - run: cluster/k8s-deploy-forklift.sh
 
       - run: kubectl wait deployment -n konveyor-forklift forklift-controller --for condition=Available=True --timeout=180s
 
       - run: echo "CLUSTER=`kind get kubeconfig | grep server | cut -d ' ' -f6`" >> $GITHUB_ENV
+      
       - run: echo "TOKEN=`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-id}' | base64 -d`.`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-secret}' | base64 -d`" >> $GITHUB_ENV 
 
       - name: Test call to Forklift

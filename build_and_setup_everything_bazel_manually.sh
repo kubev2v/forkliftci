@@ -1,29 +1,31 @@
 #!/bin/sh
 
+source ./cluster/common.sh 
 [[ -z "${REMOTE_DOCKER_HOST}" ]] || . ./setup_remote_docker_kind.sh
 
 
 [[ -z "${REMOTE_DOCKER_HOST}" ]] || setup_remote_docker
 
-. ./kind_with_registry.sh
+. ./cluster/kind/kind_with_registry.sh
 
-./get_forklift_bazel.sh
+./cluster/get_forklift_bazel.sh
 
-./k8s-deploy-kubevirt.sh
+./cluster/k8s-deploy-kubevirt.sh
 
-./k8s-deploy-cert-manager.sh
+./cluster/k8s-deploy-cert-manager.sh
 
 ./build_forklift_bazel.sh
 
-./deploy_local_forklift_bazel.sh
+./cluster/deploy_local_forklift_bazel.sh
 
-./vmware/setup.sh
+./cluster/providers/vmware/setup.sh
 
-./ovirt/setup.sh
+./cluster/providers/ovirt/setup.sh
 
-./openstack/setup.sh
+./cluster/providers/openstack/setup.sh
 
-. ./grant_permissions.sh
+# grant admin rights so its token can be used to access the API
+k8s_grant_permissions
 
 echo "CLUSTER=$CLUSTER"
 echo "TOKEN=$TOKEN"

@@ -1,5 +1,5 @@
 #!/bin/bash
-source openstack/utils.sh
+source cluster/providers/openstack/utils.sh
 
 # create cirros VM instance using glance only
 run_command_deployment packstack_create_cirros
