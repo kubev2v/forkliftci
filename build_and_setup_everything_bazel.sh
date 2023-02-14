@@ -3,16 +3,26 @@
 # if none is provided set to all by default
 [ ! -z "${PROVIDER_NAME}" ] || PROVIDER_NAME="all"
 
+echo "::group::kind_installation"
 . ./cluster/kind/kind_with_registry.sh
 
 ./cluster/k8s-deploy-kubevirt.sh
 
 ./cluster/k8s-deploy-cert-manager.sh
 
+echo "::endgroup::"
+
+echo "::group::build_forklift"
 # build forklift and push to local registry
 ./build_forklift_bazel.sh
+echo "::endgroup::"
+
+echo "::group::deploy_local_forklift"
 
 ./cluster/deploy_local_forklift_bazel.sh
+echo "::endgroup::"
+
+echo "::group::${PROVIDER_NAME} setup"
 
 case $PROVIDER_NAME in
 
@@ -50,6 +60,7 @@ case $PROVIDER_NAME in
     exit 5
     ;;
 esac
+echo "::endgroup::"
 
 source ./cluster/common.sh 
 
