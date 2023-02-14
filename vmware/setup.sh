@@ -10,6 +10,3 @@ kubectl wait deployment -n konveyor-forklift vcsim --for condition=Available=Tru
 
 # workaround to https://github.com/kubevirt/kubevirt/issues/7078
 kubectl patch --type merge -p '{"spec": {"claimPropertySets": [{"accessModes": ["ReadWriteOnce"]}]}}' StorageProfile standard
-
-
-#kubectl apply -f ./vmware/vsphere_provider.yml
