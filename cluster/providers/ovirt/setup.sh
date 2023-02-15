@@ -2,7 +2,6 @@
 
 set -ex
 
-kubectl apply -f cluster/providers/ovirt/patch.yml
 kubectl apply -f cluster/providers/ovirt/fakeovirt_deployment.yml
 kubectl apply -f cluster/providers/ovirt/ovirt_imageio_deployment.yml
 

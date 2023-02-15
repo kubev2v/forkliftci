@@ -1,7 +1,9 @@
-#!/bin/sh
+#!/bin/bash
+
+set -e
 
 source ./cluster/common.sh 
-[[ -z "${REMOTE_DOCKER_HOST}" ]] || . ./setup_remote_docker_kind.sh
+[[ -z "${REMOTE_DOCKER_HOST}" ]] || . ./cluster/kind/setup_remote_docker_kind.sh
 
 
 [[ -z "${REMOTE_DOCKER_HOST}" ]] || setup_remote_docker
@@ -26,6 +28,10 @@ source ./cluster/common.sh
 
 # grant admin rights so its token can be used to access the API
 k8s_grant_permissions
+
+# patch StorageProfile with ReadWriteOnce Access
+k8s_patch_storage_profile
+
 
 echo "CLUSTER=$CLUSTER"
 echo "TOKEN=$TOKEN"

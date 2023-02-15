@@ -2,7 +2,7 @@
 echo "Running $0"
 
 set -o errexit
-[ -z "${REMOTE_DOCKER_HOST}" ] || . ./setup_remote_docker_kind.sh
+[ -z "${REMOTE_DOCKER_HOST}" ] || . ./cluster/kind/setup_remote_docker_kind.sh
 
 go install sigs.k8s.io/kind@v0.15.0
 

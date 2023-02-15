@@ -128,10 +128,17 @@ function packstack_create_cirros_volume {
     # create cinder volume from image
     openstack volume create --image cirros --size 1 cirros-volume
 
+    # wait for the volume to be created
+    sleep 10
+
     # boot VM instance from volume
     openstack server create --flavor m1.tiny --volume cirros-volume cirros-volume
-    sleep 5
+    sleep 15
     openstack volume list 
+    openstack server list
+
+    # debug why VM failed booting
+    cat /var/log/nova/nova-compute.log  | grep ERROR | tail -40
 }
 
 function fix_nova_mount {
