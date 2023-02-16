@@ -29,6 +29,7 @@ spec:
         - containerPort: 8775
         - containerPort: 8778
         - containerPort: 9292
+        - containerPort: 8776
         - name: neutron-port
           containerPort: 9696
         volumeMounts:
@@ -78,3 +79,5 @@ spec:
     port: 9292    
   - name: neutron-api
     port: 9696    
+  - name: cinder-api
+    port: 8776

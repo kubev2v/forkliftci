@@ -147,13 +147,12 @@ function fix_nova_mount {
 }
 
 function packstack_update_endpoints {
-source /root/keystonerc_admin
+    source /root/keystonerc_admin
 
-openstack endpoint list --interface public  -c ID -c URL -f value | grep 127.0.0.1 >/tmp/output
+    openstack endpoint list --interface public  -c ID -c URL -f value | grep 127.0.0.1 >/tmp/output
 
-new_host="packstack.${namespace_name}"
-while IFS=" " read -r id url;     do 
-    openstack endpoint set --url ${url/127.0.0.1/"$new_host"} $id
-done  < /tmp/output
-
+    new_host="packstack.${namespace_name}"
+    while IFS=" " read -r id url;     do 
+        openstack endpoint set --url ${url/127.0.0.1/"$new_host"} $id
+    done  < /tmp/output
 }
