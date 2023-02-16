@@ -1,6 +1,6 @@
 #!/bin/bash
 
-
+# grant admin rights so its token can be used to access the API
 function k8s_grant_permissions {
     USER=system:bootstrap:`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-id}' | base64 -d`
     echo "Assign cluster-admin role to user $USER"

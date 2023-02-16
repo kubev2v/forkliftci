@@ -12,96 +12,37 @@ used as a VM migration target.
 Only the backend is installed, i.e. operator/controller/validation, without
 the UI, because it is meant to be the target for running automated tests.
 
-
-# Prerequisits
-
+# Prerequisites
 * [go](https://golang.org/)
 * [docker](https://www.docker.com/) or [podman](https://podman.io/)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/)
 * [git](https://git-scm.com/)
+* [bazel](https://bazel.build/)
 
 
 # All in one script
 
-Run the script
-[build_and_setup_everything.sh](build_and_setup_everything.sh) to get kind,
-create a local docker registry, create a cluster, get the latest sources of
-forklift, patch them to use the local registry, build the docker images,
-push the images to the local registry, deploy forklift, install kubevirt and
-grant cluster-admin role to the kind default user _abcdef_. It will take a
-few minutes and output progress info that might look like errors. Please be
-patient.
+Run the script [build_and_setup_everything_bazel_manually.sh]
+(build_and_setup_everything_bazel_manually.sh) 
 
-See below for the individual steps.
+this script will:
+- create a local docker registry
+- download and create a [kind](https://kind.sigs.k8s.io/) K8s cluster
+- get the latest forklift code  (https://github.com/kubev2v/forklift)
+- build the forklift images using bazel
+- push the images to the local registry using bazel
+- deploy forklift from the local registry images
+- install migration providers for e2e testing
+
+# providers
+we are installing those providers as part of k8s kind cluster :
+- [VMware - vcsim](https://github.com/vmware/govmomi/blob/main/vcsim/README.md)
+- [OpenStack - packstack](https://github.com/kubev2v/packstack-img)
+- [oVirt - fakeovirt and ovirt-imageio](https://github.com/kubev2v/fakeovirt)
+
 
 In order to just install the latest release of forklift please see
 [INSTALL_FORKLIFT_ON_KIND.md](INSTALL_FORKLIFT_ON_KIND.md).  
-In order to build & install the new version of forklift, with bazel and a single repo, please see
-[BUILD_AND_INSTALL_FORKLIFT_ON_KIND_BAZEL.md](BUILD_AND_INSTALL_FORKLIFT_ON_KIND_BAZEL.md).
-
-
-# Get kind and create the cluster
-
-Run the script [kind_with_registry.sh](kind_with_registry.sh) to get kind and
-create a new cluster. (Original source:
-https://kind.sigs.k8s.io/docs/user/local-registry/)
-If the script is sourced instead it exports the variable $CLUSTER which can
-be used as the URL prefix for queries:
-
-    $ CLUSTER=`kind get kubeconfig | grep server | cut -d ' ' -f6`
-
-
-# Get forklift sources
-
-Run the script [get_forklift.sh](get_forklift.sh) to clone the github
-repositories for the forklift-operator, forklift-controller and
-forklift-validation
-
-
-# Patch for local registry
-
-In order to support our local docker registry the Makefiles and some yaml
-needs to be patched. To do this run the script
-[patch_for_local_registry.sh](patch_for_local_registry.sh) in the same directory where the
-forklift repositories were checked out.  
-*Warning:* the patch matches the state of the forklift repositories on
-2022-09-12. It might become obsolete of the files which need patching are
-updated.
-
-
-# Build the docker images and push them to the registry
-
-Run the script [build_forklift.sh](build_forklift.sh).
-
-
-# Deploy forklift
-
-Run the script [deploy_local_forklift.sh](deploy_local_forklift.sh).
-
-
-# Install kubevirt
-
-Run the script [k8s-deploy-kubevirt.sh](k8s-deploy-kubevirt.sh) to deploy
-kubevirt and everything it needs to the new cluster.
-This can also take a moment.
-
-# Install cert-manager
-Run the script [k8s-deploy-cert-manager.sh](k8s-deploy-cert-manager.sh) to
-deploy [cert-manager](https://cert-manager.io).
-
-# Set Permissions
-
-Since this is for test clusters only we use the simplest form of "access
-control". Kind has a default user _abcdef_. We give this user admin rights
-and then we use its bearer token to authenticate our API requests with curl.
-This is totally **unsafe** and strictly for temporary test clusters!
-
-Run the script [grant_permissions.sh](grant_permissions.sh) to give the
-default user (_abcdef_) admin rights so its token can be used to access the
-API. If You source that script instead then it also stores the token in the
-variable $TOKEN. You can also set it manually:
-    
-    $ TOKEN=`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-id}' | base64 -d`.`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-secret}' | base64 -d`
 
 
 # Verify that forklift is running
