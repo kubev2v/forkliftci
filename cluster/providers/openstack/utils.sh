@@ -145,3 +145,15 @@ function fix_nova_mount {
   mkdir -p /var/lib/cinder/mnt/ 
   ln -s /var/lib/cinder/mnt/ /var/lib/nova/mnt
 }
+
+function packstack_update_endpoints {
+source /root/keystonerc_admin
+
+openstack endpoint list --interface public  -c ID -c URL -f value | grep 127.0.0.1 >/tmp/output
+
+new_host="packstack.${namespace_name}"
+while IFS=" " read -r id url;     do 
+    openstack endpoint set --url ${url/127.0.0.1/"$new_host"} $id
+done  < /tmp/output
+
+}
