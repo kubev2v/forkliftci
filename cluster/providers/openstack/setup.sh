@@ -11,7 +11,7 @@ while ! kubectl get deployment -n konveyor-forklift packstack; do sleep 10; done
 kubectl wait deployment -n konveyor-forklift packstack --for condition=Available=True --timeout=280s
 
 # deploy csi-driver-nfs
-cluster/providers/openstack/deploy_csi_driver_nfs.sh "${ext_ip}"
+cluster/providers/utils/deploy_csi_driver_nfs.sh "${ext_ip}"
 
 
 sleep 5

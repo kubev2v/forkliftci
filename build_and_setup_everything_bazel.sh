@@ -40,7 +40,9 @@ case $PROVIDER_NAME in
     ./cluster/providers/vmware/setup.sh
     ;;
   "ovirt")
-    echo "installing ovirt providers" 
+    echo "installing ovirt providers"
+    # installs NFS for CSI
+    ./cluster/providers/openstack/install_nfs.sh
     ./cluster/providers/ovirt/setup.sh
     ;;  
   "openstack")
