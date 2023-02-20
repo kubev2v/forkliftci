@@ -1,0 +1,83 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: openstack-populator-account
+  namespace: konveyor-forklift
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: openstack-populator-role
+rules:
+  - apiGroups: [""]
+    resources: [persistentvolumes]
+    verbs: [get, list, watch, patch]
+  - apiGroups: [""]
+    resources: [persistentvolumeclaims]
+    verbs: [get, list, watch, patch, create, delete]
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, watch, create, delete]
+  - apiGroups: [storage.k8s.io]
+    resources: [storageclasses]
+    verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [secrets]
+    verbs: [list, watch, get]
+  - apiGroups: [forklift.konveyor.io]
+    resources: [openstackvolumepopulators]
+    verbs: [get, list, watch, update]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: openstack-populator-binding
+subjects:
+  - kind: ServiceAccount
+    name: openstack-populator-account
+    namespace: konveyor-forklift
+  - kind: ServiceAccount
+    name: default
+    namespace: konveyor-forklift
+roleRef:
+  kind: ClusterRole
+  name: openstack-populator-role
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: openstack-populator
+  namespace: konveyor-forklift
+spec:
+  selector:
+    matchLabels:
+      app: openstack-populator
+  template:
+    metadata:
+      labels:
+        app: openstack-populator
+    spec:
+      serviceAccount: openstack-populator-account
+      containers:
+        - name: openstack-populator
+          image: quay.io/bzlotnik/openstack-volume-populator:latest
+          imagePullPolicy: Always
+          args:
+            - --mode=controller
+            - --image-name=quay.io/bzlotnik/openstack-volume-populator:latest
+            - --http-endpoint=:8080
+          ports:
+            - containerPort: 8080
+              name: http-endpoint
+              protocol: TCP
+---
+kind: VolumePopulator
+apiVersion: populator.storage.k8s.io/v1beta1
+metadata:
+  name: openstack-volume-populator
+sourceKind:
+  group: forklift.konveyor.io
+  kind: OpenstackVolumePopulator
+

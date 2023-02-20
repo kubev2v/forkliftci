@@ -24,10 +24,14 @@ echo "::endgroup::"
 
 echo "::group::${PROVIDER_NAME} setup"
 
+source ./cluster/common.sh 
+
 case $PROVIDER_NAME in
 
   "all")
     echo "installing all providers"
+    # apply k8s volume populator manifests
+    k8s_apply_volume_populator    
     ./cluster/providers/vmware/setup.sh
     ./cluster/providers/ovirt/setup.sh
     ./cluster/providers/openstack/install_nfs.sh
@@ -41,12 +45,18 @@ case $PROVIDER_NAME in
     ;;
   "ovirt")
     echo "installing ovirt providers"
+    # apply k8s volume populator manifests
+    k8s_apply_volume_populator
+
     # installs NFS for CSI
     ./cluster/providers/openstack/install_nfs.sh
     ./cluster/providers/ovirt/setup.sh
+
     ;;  
   "openstack")
     echo "installing openstack providers" 
+    # apply k8s volume populator manifests
+    k8s_apply_volume_populator
       
     #installs nfs for CSI and opentack volumes
     ./cluster/providers/openstack/install_nfs.sh
@@ -64,12 +74,10 @@ case $PROVIDER_NAME in
 esac
 echo "::endgroup::"
 
-source ./cluster/common.sh 
-
 # grant admin rights so its token can be used to access the API
 k8s_grant_permissions
 
-# pactch StorageProfile with ReadWriteOnce Access
+# patch StorageProfile with ReadWriteOnce Access
 k8s_patch_storage_profile
 
 echo "CLUSTER=$CLUSTER"
