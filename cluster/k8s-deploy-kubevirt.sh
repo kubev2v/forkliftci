@@ -15,7 +15,7 @@ kubectl apply -f https://github.com/kubevirt/cluster-network-addons-operator/rel
 kubectl apply -f https://github.com/kubevirt/cluster-network-addons-operator/releases/download/$CNA_VERSION/operator.yaml
 
 # Install kubevirt
-export VIRT_VERSION=v0.58.0
+export VIRT_VERSION=v0.58.1
 #$(curl -s https://api.github.com/repos/kubevirt/kubevirt/releases | grep tag_name | grep -v -- '-rc' | sort -r | head -1 | awk -F': ' '{print $2}' | sed 's/,//' | xargs)
 kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/${VIRT_VERSION}/kubevirt-operator.yaml
 kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/${VIRT_VERSION}/kubevirt-cr.yaml
