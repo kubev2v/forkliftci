@@ -26,3 +26,4 @@ volumeBindingMode: Immediate
 mountOptions:
 EOF
 
+kubectl create secret generic mount-options --from-literal mountOptions="nfsvers=4.1"

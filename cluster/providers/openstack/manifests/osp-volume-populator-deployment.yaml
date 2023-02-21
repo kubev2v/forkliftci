@@ -62,11 +62,11 @@ spec:
       serviceAccount: openstack-populator-account
       containers:
         - name: openstack-populator
-          image: quay.io/bzlotnik/openstack-volume-populator:latest
+          image:  quay.io/bzlotnik/openstack-volume-populator:ci
           imagePullPolicy: Always
           args:
             - --mode=controller
-            - --image-name=quay.io/bzlotnik/openstack-volume-populator:latest
+            - --image-name=quay.io/bzlotnik/openstack-volume-populator:ci
             - --http-endpoint=:8080
           ports:
             - containerPort: 8080
