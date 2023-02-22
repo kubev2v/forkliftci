@@ -136,9 +136,6 @@ function packstack_create_cirros_volume {
     sleep 15
     openstack volume list 
     openstack server list
-
-    # debug why VM failed booting
-    cat /var/log/nova/nova-compute.log  | grep ERROR | tail -40
 }
 
 function fix_nova_mount {
@@ -155,4 +152,59 @@ function packstack_update_endpoints {
     while IFS=" " read -r id url;     do 
         openstack endpoint set --url ${url/127.0.0.1/"$new_host"} $id
     done  < /tmp/output
+}
+
+function packstack_test_snapshot_creation {
+    source /root/keystonerc_admin
+    # create snapshot from cirros-volume 
+    snaphot_id=$(openstack volume snapshot create cirros-volume --force -c id  -f value 2>&1)
+    [ $? -ne 0 ] && { echo "error creating snapshot: ${snaphot_id}" ; return 2; }
+    sleep 2
+    snapshot_status=$(openstack volume snapshot show ${snaphot_id} -c status -f value)
+    [ "${snapshot_status}" != "available" ] && \
+    { echo "snapshot ${snapshot_id} status ${snapshot_status}"; return 2;}
+    
+}
+
+# retry connecting to port until its reachable
+function retry_port_reachable {
+    local port=$1
+    curl --connect-timeout 5  \
+        --max-time 10 \
+        --retry 5 \
+        --retry-delay 0 \
+        --retry-connrefused  \
+        --retry-max-time 30 http://localhost:${port}
+}
+
+
+
+function set_cinder_ip {
+    local ext_ip=$1
+    sed -ie "s/127.0.0.1/${ext_ip}/" /etc/cinder/nfs_shares.conf
+    systemctl restart openstack-cinder-volume.service
+}
+
+# patch packstack to allow NFS volume snapshots creation 
+function packstack_patch_snapshots_support {
+    
+    [ -f "/etc/cinder/cinder.conf.orig" ] && return
+
+    cat /etc/cinder/cinder.conf  | grep -v '#' | grep -v -e "^$"  >/etc/cinder/cinder.conf.new
+sed -ie "s/\[backend_defaults\]//" /etc/cinder/cinder.conf.new
+cat <<__EOF__  >>/etc/cinder/cinder.conf.new
+[backend_defaults]
+nfs_snapshot_support = true
+nas_secure_file_operations = false
+nas_secure_file_permissions = false
+__EOF__
+
+    mv /etc/cinder/cinder.conf /etc/cinder/cinder.conf.orig
+    mv /etc/cinder/cinder.conf.new /etc/cinder/cinder.conf
+
+    # workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1936281 
+    # until we find better solution
+    sed -ie "s/context.project_domain_id/'default'/" /usr/lib/python3.6/site-packages/cinder/compute/nova.py
+    systemctl restart openstack-cinder-api.service openstack-cinder-volume.service openstack-cinder-scheduler.service
+    retry_port_reachable "8776"
 }

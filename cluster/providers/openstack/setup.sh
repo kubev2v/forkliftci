@@ -25,4 +25,5 @@ source cluster/providers/openstack/utils.sh
 # workaround for unable to attaching volume to a VM (missing mount for nova)
 run_command_deployment fix_nova_mount
 run_command_deployment packstack_update_endpoints
+run_command_deployment packstack_patch_snapshots_support
 run_command_deployment healthcheck
