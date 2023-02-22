@@ -9,6 +9,7 @@ curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.1.
 
 
 cat << EOF | kubectl apply -f -
+---
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
@@ -24,5 +25,14 @@ parameters:
 reclaimPolicy: Delete
 volumeBindingMode: Immediate
 mountOptions:
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: mount-options
+  namespace: default
+data:
+  mountOptions: bmZzdmVycz00LjE=
+type: Opaque
 EOF
 
