@@ -26,20 +26,14 @@ source ./cluster/common.sh
 # deploy forklift from local docker registry
 ./cluster/deploy_local_forklift_bazel.sh
 
-# run VMware provider setup
-./cluster/providers/vmware/setup.sh
-
-# run ovirt provider setup
-./cluster/providers/ovirt/setup.sh
-
-# run openstack/packstack provider setup
-./cluster/providers/openstack/setup.sh
-
 # grant admin rights so its token can be used to access the API
 k8s_grant_permissions
 
 # patch StorageProfile with ReadWriteOnce Access
 k8s_patch_storage_profile
+
+# optionally install provider (options: all/ovirt/openstack/vsphere)
+[[ -z "${PROVIDER_NAME}" ]] || ./cluster/providers/install-provider.sh "${PROVIDER_NAME}"
 
 
 echo "CLUSTER=$CLUSTER"
