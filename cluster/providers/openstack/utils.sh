@@ -159,10 +159,14 @@ function packstack_test_snapshot_creation {
     # create snapshot from cirros-volume 
     snaphot_id=$(openstack volume snapshot create cirros-volume --force -c id  -f value 2>&1)
     [ $? -ne 0 ] && { echo "error creating snapshot: ${snaphot_id}" ; return 2; }
-    sleep 2
+    
+    sleep 5
     snapshot_status=$(openstack volume snapshot show ${snaphot_id} -c status -f value)
     [ "${snapshot_status}" != "available" ] && \
     { echo "snapshot ${snapshot_id} status ${snapshot_status}"; return 2;}
+
+    openstack volume snapshot list
+    openstack volume snapshot delete ${snaphot_id}
     
 }
 
