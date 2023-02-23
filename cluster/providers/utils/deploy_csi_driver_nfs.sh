@@ -3,7 +3,7 @@
 set -ex
 
 nfs_server_ip=$1
-
+nfs_share=$2
 # Install latest csi-driver-nfs
 curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.1.0/deploy/install-driver.sh | bash -s v4.1.0 --
 
@@ -17,7 +17,7 @@ metadata:
 provisioner: nfs.csi.k8s.io
 parameters:
   server: ${nfs_server_ip}
-  share: /home/nfsshare
+  share: ${nfs_share}
   subDir: nfs-csi  
   # csi.storage.k8s.io/provisioner-secret is only needed for providing mountOptions in DeleteVolume
   csi.storage.k8s.io/provisioner-secret-name: "mount-options"

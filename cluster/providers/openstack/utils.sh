@@ -104,7 +104,7 @@ function packstack_create_cirros {
     source /root/keystonerc_admin
     nova-manage cell_v2 discover_hosts
     sleep 2
-    wget https://download.cirros-cloud.net/0.6.1/cirros-0.6.1-x86_64-disk.img -O /tmp/cirros-0.6.1.img
+    wget -q https://download.cirros-cloud.net/0.6.1/cirros-0.6.1-x86_64-disk.img -O /tmp/cirros-0.6.1.img
     openstack network create net-int
     openstack subnet create sub-int --network net-int --subnet-range 192.0.2.0/24
 
@@ -156,6 +156,7 @@ function packstack_update_endpoints {
 
 function packstack_test_snapshot_creation {
     source /root/keystonerc_admin
+
     # create snapshot from cirros-volume 
     snaphot_id=$(openstack volume snapshot create cirros-volume --force -c id  -f value 2>&1)
     [ $? -ne 0 ] && { echo "error creating snapshot: ${snaphot_id}" ; return 2; }
@@ -167,7 +168,8 @@ function packstack_test_snapshot_creation {
 
     openstack volume snapshot list
     openstack volume snapshot delete ${snaphot_id}
-    
+
+    return 0
 }
 
 # retry connecting to port until its reachable
@@ -182,10 +184,11 @@ function retry_port_reachable {
 }
 
 
+# update cinder nfs: ie 127.0.0.1:/home/nfsshare
+function packstack_update_nfs_path {
+    local nfs_path=$1
 
-function set_cinder_ip {
-    local ext_ip=$1
-    sed -ie "s/127.0.0.1/${ext_ip}/" /etc/cinder/nfs_shares.conf
+    echo $nfs_path >/etc/cinder/nfs_shares.conf
     systemctl restart openstack-cinder-volume.service
 }
 

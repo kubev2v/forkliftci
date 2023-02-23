@@ -26,23 +26,45 @@ Run the script [build_and_setup_everything_bazel_manually.sh]
 (build_and_setup_everything_bazel_manually.sh) 
 
 this script will:
-- create a local docker registry
-- download and create a [kind](https://kind.sigs.k8s.io/) K8s cluster
-- get the latest forklift code  (https://github.com/kubev2v/forklift)
-- build the forklift images using bazel
-- push the images to the local registry using bazel
-- deploy forklift from the local registry images
-- install migration providers for e2e testing
+1. create a local docker registry
+2. download and create a [kind](https://kind.sigs.k8s.io/) K8s cluster
+3. get the latest forklift code  (https://github.com/kubev2v/forklift).
+4. build the forklift images using bazel
+5. push the images to the local registry using bazel
+6. deploy forklift from the local registry images
+7. install migration providers for e2e testing
+
+In order to just install the latest release of forklift please see
+[INSTALL_FORKLIFT_ON_KIND.md](INSTALL_FORKLIFT_ON_KIND.md).  
+
+
+## environmenet variables
+- FORKLIFT_DIR - specify alternative forklift path. 
 
 # providers
-we are installing those providers as part of k8s kind cluster :
+it is possible to install the following source providers as part of k8s kind cluster :
 - [VMware - vcsim](https://github.com/vmware/govmomi/blob/main/vcsim/README.md)
 - [OpenStack - packstack](https://github.com/kubev2v/packstack-img)
 - [oVirt - fakeovirt and ovirt-imageio](https://github.com/kubev2v/fakeovirt)
 
 
-In order to just install the latest release of forklift please see
-[INSTALL_FORKLIFT_ON_KIND.md](INSTALL_FORKLIFT_ON_KIND.md).  
+Run the script: 
+```shell
+cluster/providers/install-provider.sh <provider-name>
+```
+when `<provider-name>` can be one of those:
+- ovirt
+- openstack
+    - configuration environment variables:
+        | variable      | Description | Required |
+        | ----------- | ----------- | ---- |
+        | NFS_IP_ADDRESS      | NFS server ip address       | V |
+        | NFS_SHARE   | path to the nfs export.        | V |
+        | INSTALL_NFS | install nfs server locally |  | 
+   
+- vsphere
+- all
+
 
 
 # Verify that forklift is running

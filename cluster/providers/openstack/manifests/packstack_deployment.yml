@@ -42,8 +42,6 @@ spec:
           failureThreshold: 30
           periodSeconds: 10
         env:
-          - name: EXTERNAL_IP
-            value: <set_external_ip>
           - name: NAMESPACE
             value: konveyor-forklift
           - name: PORT
