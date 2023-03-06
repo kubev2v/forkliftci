@@ -25,6 +25,10 @@ case $PROVIDER_NAME in
     ;;
   "vsphere")
     echo "installing vsphere providers"
+
+    # installs NFS for CSI
+    [ ! -z "${INSTALL_NFS}" ] && ${SCRIPT_DIR}/openstack/install_nfs.sh
+
     ${SCRIPT_DIR}/vmware/setup.sh
     ;;
   "ovirt")
