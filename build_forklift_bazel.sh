@@ -21,6 +21,7 @@ export REGISTRY_ACCOUNT=""
 export CONTAINER_CMD=$(which docker)
 
 # REGISTRY_ACCOUNT cannot be empty with docker
+REGISTRY_ACCOUNT=ci make push-openstack-populator-image
 REGISTRY_ACCOUNT=ci make push-ovirt-populator-image
 REGISTRY_ACCOUNT=ci make push-populator-controller-image
 
@@ -37,6 +38,7 @@ bazel run push-forklift-operator-bundle \
     --action_env VIRT_V2V_DONT_REQUEST_KVM=true \
     --action_env POPULATOR_CONTROLLER_IMAGE=${REGISTRY}/ci/populator-controller:${REGISTRY_TAG} \
     --action_env OVIRT_POPULATOR_IMAGE=${REGISTRY}/ci/ovirt-populator:${REGISTRY_TAG}
+    --action_env OPENSTACK_POPULATOR_IMAGE=${REGISTRY}/ci/openstack-populator:${REGISTRY_TAG}
 
 bazel run push-forklift-operator-index --action_env REGISTRY=${REGISTRY} --action_env REGISTRY_TAG=${REGISTRY_TAG} --action_env OPM_OPTS="--use-http"
 

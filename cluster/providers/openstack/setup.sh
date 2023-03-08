@@ -12,13 +12,6 @@ kubectl wait deployment -n konveyor-forklift packstack --for condition=Available
 # deploy csi-driver-nfs
 cluster/providers/utils/deploy_csi_driver_nfs.sh "${NFS_IP_ADDRESS}" "${NFS_SHARE}"
 
-# apply openstack volume populator crds
-kubectl apply -f cluster/providers/openstack/manifests/osp-volume-populator-crd.yaml
-
-# apply openstack volume populator deployment
-kubectl apply -f cluster/providers/openstack/manifests/osp-volume-populator-deployment.yaml
-kubectl wait deployment -n konveyor-forklift openstack-populator --for condition=Available=True --timeout=60s
-
 sleep 5
 source cluster/providers/openstack/utils.sh
 # workaround for unable to attaching volume to a VM (missing mount for nova)
