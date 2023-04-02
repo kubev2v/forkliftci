@@ -21,7 +21,7 @@ source ./cluster/common.sh
 ./cluster/k8s-deploy-cert-manager.sh
 
 # build forklift from source and push to local docker registry
-./build_forklift_bazel.sh
+./build_forklift_bazel.sh ${PROVIDER_NAME}
 
 # deploy forklift from local docker registry
 ./cluster/deploy_local_forklift_bazel.sh

@@ -21,7 +21,7 @@ echo "::endgroup::"
 
 echo "::group::build_forklift"
 # build forklift and push to local registry
-./build_forklift_bazel.sh
+./build_forklift_bazel.sh ${PROVIDER_NAME}
 echo "::endgroup::"
 
 echo "::group::deploy_local_forklift"
