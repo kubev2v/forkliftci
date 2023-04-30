@@ -40,10 +40,10 @@ bazel run push-forklift-operator
 
 ACTION_ENV="--action_env CONTROLLER_IMAGE=${REGISTRY}/forklift-controller:${REGISTRY_TAG} \
     --action_env VALIDATION_IMAGE=${REGISTRY}/forklift-validation:${REGISTRY_TAG} \
-    --action_env OPERATOR_IMAGE=${REGISTRY}/forklift-operator:${REGISTRY_TAG}
+    --action_env OPERATOR_IMAGE=${REGISTRY}/forklift-operator:${REGISTRY_TAG} \
     --action_env API_IMAGE=${REGISTRY}/forklift-api:${REGISTRY_TAG}"
 
-# if provider is ovirt or openstack, builder controller
+# if provider is ovirt or openstack, builder populator controller
 if [ "${PROVIDER_NAME}" = "ovirt" ] || [ "${PROVIDER_NAME}" = "openstack" ]; then
     ACTION_ENV="$ACTION_ENV --action_env POPULATOR_CONTROLLER_IMAGE=${REGISTRY}/ci/populator-controller:${REGISTRY_TAG}"
 fi
