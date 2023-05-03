@@ -1,0 +1,14 @@
+okd_rhv_network: ovn-vmnet-25
+# OKD cluster name, must match the API FQDN.
+okd_cluster_name: ovirt25
+# Assisted service FQDN or ip address.
+okd_vm_mac_address: 46:1f:24:48:04:13
+okd_base_domain: gcp.devcluster.openshift.com
+ovirt_storage_name: localdisk_bm20
+ovirt_cluster_name: OCP-45
+NFS_IP_ADDRESS: 192.168.225.1
+NFS_SHARE: /opt/nfs
+ansible_runner_image: quay.io/ovirt/ansible-runner:ovirt-46
+
+# delete okd cluster if already exists - default false
+#force_create: false

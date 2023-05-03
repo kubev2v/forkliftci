@@ -1,0 +1,15 @@
+- name: remove okd-sno VM from the engine
+  ovirt_vm:
+    name: "{{okd_vm_name | default('okd-sno')}}"
+    state: absent
+    auth: "{{ovirt_auth}}"
+
+- name: delete cluster {{ okd_cluster_id }} 
+  uri:
+    url: "{{assisted_api_url}}/clusters/{{okd_cluster_id}}"
+    method: DELETE
+    headers:
+      Version: "4"
+      Content-Type: "application/json"
+      Accept: "application/json"
+    status_code: 204

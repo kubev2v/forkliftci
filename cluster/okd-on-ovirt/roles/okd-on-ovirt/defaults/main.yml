@@ -1,0 +1,5 @@
+---
+okd_vm_cpu: 12
+okd_root_disk_size: 150GiB
+okd_vm_memory_size: 48GiB
+assisted_api_url: "http://{{ assisted_fqdn }}:8080/api/assisted-install/v2"

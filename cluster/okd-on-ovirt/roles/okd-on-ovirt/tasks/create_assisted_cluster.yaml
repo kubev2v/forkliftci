@@ -1,0 +1,64 @@
+---
+
+- name: create assisted cluster
+  block:
+  - name: create cluster via  POST
+    uri:
+      url: "{{assisted_api_url}}/clusters/"
+      method: POST
+      headers:
+        Version: "4"
+        Content-Type: "application/json"
+        Accept: "application/json"
+      status_code: 201
+      body: "{{ lookup('template','new_cluster_body.json.j2', convert_data=False) | string }}"
+
+    register: reported_ips
+    delegate_to: localhost
+
+  - assert:
+      that: 
+        - reported_ips.json.id is defined
+
+  - debug:
+      msg: "{{reported_ips.json.id}}"
+
+  - set_fact:
+      okd_cluster_id: "{{ reported_ips.json.id }}"
+      
+  - name: create assisted cluster
+    uri:
+      url: "{{assisted_api_url}}/infra-envs/"
+      method: POST
+      headers:
+        Version: "4"
+        Content-Type: "application/json"
+        Accept: "application/json"
+      status_code: 201
+      body: "{{ lookup('template','new_infra_env.json.j2', convert_data=False) | string }}"
+    register: infra
+
+  - assert:
+      that: 
+        - infra.json.download_url is defined
+
+  - debug:
+      msg: "{{infra.json.download_url}}"
+
+
+  - set_fact:
+      discovery_image_url: "{{ infra.json.download_url }}"
+
+  rescue:
+    - name: delete cluster {{ okd_cluster_id }} after failure
+      uri:
+        url: "{{assisted_api_url}}/clusters/{{okd_cluster_id}}"
+        method: DELETE
+        headers:
+          Version: "4"
+          Content-Type: "application/json"
+          Accept: "application/json"
+        status_code: 204
+
+    - fail:
+        msg: error

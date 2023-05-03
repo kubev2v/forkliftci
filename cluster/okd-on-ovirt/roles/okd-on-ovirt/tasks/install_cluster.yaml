@@ -1,0 +1,33 @@
+---
+
+- name: install assisted cluster
+  block:
+  - name: install cluster via  POST
+    uri:
+      url: "{{assisted_api_url}}/clusters/{{okd_cluster_id}}/actions/install"
+      method: POST
+      headers:
+        Version: "4"
+        Content-Type: "application/json"
+        Accept: "application/json"
+      status_code: 202
+    register: return_json
+    
+  - assert:
+      that: 
+        - return_json.json.status is defined
+        - return_json.json.status == "preparing-for-installation"
+
+  - name: wait until the installed state is reached or until the timeout period ends.
+    uri:
+      url: "{{assisted_api_url}}/clusters/{{okd_cluster_id}}"
+      method: GET
+      headers:
+        Version: "4"
+        Content-Type: "application/json"
+        Accept: "application/json"
+      status_code: 200
+    register: cluster_info
+    until: cluster_info.json.status == "installed"
+    retries: 40
+    delay: 60

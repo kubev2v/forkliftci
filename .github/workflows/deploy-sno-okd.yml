@@ -1,0 +1,158 @@
+name: Trigger okd test
+
+on:
+  workflow_dispatch:
+    inputs:
+      perform_cleanup:
+        description: 'do we want to perform env cleanup'
+        required: true
+        default: true
+        type: boolean
+         
+  schedule:
+    - cron: '30 */2 * * *'
+jobs:
+  build:
+    name: Deploy OKD
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out forkliftci repository
+        uses: actions/checkout@v3
+
+      - name: Add cwd to path for kubectl.
+        run: echo `pwd` >> $GITHUB_PATH
+
+      - name: Checkout forklift
+        uses: actions/checkout@v3
+        with:
+          repository: kubev2v/forklift
+          path: forklift
+          
+      - name: run OKD deployment
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/cluster/okd-on-ovirt/
+          source ../common.sh
+          source utils.sh
+          
+          mkdir .conf/
+          echo ${{ secrets.OKD_ENGINE_SECRETS }} >${SECRETS_PATH}.b64
+          echo ${{ secrets.OKD_SSH_KEY }}  >>/tmp/id_ssh_rsa.b64
+
+
+          cat ${SECRETS_PATH}.b64 | base64 -d >${SECRETS_PATH}
+          cat /tmp/id_ssh_rsa.b64 | base64 -d >/tmp/id_ssh_rsa
+          sudo chown root:root /tmp/id_ssh_rsa
+          sudo chmod 600 /tmp/id_ssh_rsa
+
+          # deploy okd on ovirt using ansible
+          run_docker_ansible_deploy
+
+      - name: install hco & forklift 
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/cluster/okd-on-ovirt/
+          source ../common.sh
+          source utils.sh
+          #TODO: get kubeconfig from the cluster and set KUBECONFIG env
+
+          download_kubeconf "/tmp/kubeconfig"
+         
+          k8s_apply_volume_populator
+          NFS_IP_ADDRESS=$(get_conf_value "${CONF_PATH}" "NFS_IP_ADDRESS")
+          NFS_SHARE=$(get_conf_value "${CONF_PATH}" "NFS_SHARE")
+          ${GITHUB_WORKSPACE}/cluster/providers/utils/deploy_csi_driver_nfs.sh "${NFS_IP_ADDRESS}" "${NFS_SHARE}"
+
+          k8s_apply_mco_container_use_devices
+
+          # deploy hyperconverged operator
+          k8s_apply_hco
+
+          # deploy latest forklift operator using subscription
+          k8s_apply_forklift_latest
+
+
+      - name: prepare the test VM 
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/cluster/okd-on-ovirt/
+          source utils.sh
+
+          # Create test fedora VM
+          run_docker_create_vm
+
+      - name: run e2e suite tests 
+        shell: bash
+        run: |
+          cd ${GITHUB_WORKSPACE}/cluster/okd-on-ovirt/
+          source utils.sh
+
+          # export test variables for the tests
+          export_test_var
+          cd ${GITHUB_WORKSPACE}/forklift
+          make e2e-sanity-ovirt
+
+      - name: run virtctl - check if vm booted 
+        shell: bash
+        id: vm_booted
+        run: |
+          cd ${GITHUB_WORKSPACE}/cluster/okd-on-ovirt/
+          source utils.sh
+          # verify VM is booted
+          # TODO: move into the test suite
+          download_virtctl
+          run_virtctl_cmd_timeout
+
+
+
+      - name: save k8s logs
+        if: always()
+        run: |
+          cd ${GITHUB_WORKSPACE}/cluster/okd-on-ovirt/
+          source utils.sh
+          mkdir /tmp/artifacts/
+          set +e
+          kubectl get pods -n konveyor-forklift >> /tmp/artifacts/k8s-pods.log
+          kubectl get events --field-selector type!=Normal -A --sort-by='.lastTimestamp' >> /tmp/artifacts/k8s_abnormal_events.log
+          kubectl get all -n konveyor-forklift -o yaml >> /tmp/artifacts/k8s-all-forklift-objects.log
+          kubectl get migrations -A -o yaml >> /tmp/artifacts/k8s-all-migrations.log
+          kubectl get plans -A -o yaml >> /tmp/artifacts/k8s-all-plans.log
+          kubectl get Virtualmachines -A -o yaml >> /tmp/artifacts/k8s-all-Virtualmachines.log
+          kubectl logs -n konveyor-forklift $(kubectl get po -n konveyor-forklift  -o=name | grep forklift-controller) >> /tmp/artifacts/k8s-forklift-controller-inventory.log
+          kubectl get Storageclasses -A -o yaml >> /tmp/artifacts/k8s-storage-classes.log
+
+          # CRDs in e2e-tests generated Namespace
+          generatedNS=$(kubectl get ns -o=name |grep forklift-e2e-tests | cut -d/ -f2)
+          kubectl describe pods -n ${generatedNS} >> /tmp/artifacts/k8s-pods-describe-forklift-tests.log
+          kubectl get events -n ${generatedNS} --sort-by='.lastTimestamp' >> /tmp/artifacts/k8s-events-forklift-tests.log
+          kubectl api-resources --verbs=list --namespaced -o name | grep forklift.konveyor.io | xargs -n 1 kubectl get -oyaml  --show-kind --ignore-not-found -n ${generatedNS}  >> /tmp/artifacts/k8s-objects-forklift-tests.log
+          
+          
+          kubectl describe pods -n konveyor-forklift >> /tmp/artifacts/k8s-pods-describe-konveyor-forklift.log
+
+          # CSI controller
+          kubectl logs -n kube-system $(kubectl get po -n kube-system  -o=name | grep csi-nfs-controller)  csi-provisioner >> /tmp/artifacts/k8s-csi-nfs-provisioner.log
+          kubectl logs -n kube-system $(kubectl get po -n kube-system  -o=name | grep csi-nfs-controller)  nfs >> /tmp/artifacts/k8s-csi-nfs.log
+          
+          # PVCs
+          kubectl get pvc -A >> /tmp/artifacts/k8s-pvc.log
+          kubectl logs -n konveyor-forklift $(kubectl get po -n konveyor-forklift  -o=name | grep forklift-volume-populator) >> /tmp/artifacts/k8s-forklift-volume-populator.log
+
+      - name: cleanup
+        shell: bash
+        if: always()
+        run: |
+          # exit early if cleanup not set
+          [ ${{ inputs.perform_cleanup  || 'true' }} !=  "true" ]  && exit
+
+          # dont perform a cleanup if vm_booted test has failed
+          [ ${{ steps.vm_booted.outcome }} ==  "failure" ]  && exit
+          cd ${GITHUB_WORKSPACE}/cluster/okd-on-ovirt/
+          source utils.sh
+          run_docker_ansible_cleanup
+
+      - uses: actions/upload-artifact@master
+        if: always()
+        with:
+          name: ovirt-k8s-forklift-logs
+          path: /tmp/artifacts

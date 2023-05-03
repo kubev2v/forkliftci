@@ -1,0 +1,111 @@
+---
+- include: login_to_ovirt.yaml
+  tags: always
+
+
+- name: check if cluster exists
+  uri:
+    url: "http://{{ assisted_fqdn }}:8080/api/assisted-install/v2/clusters/"
+  register: clusters_out
+  tags: always
+
+- set_fact:
+    okd_vm_name: "okd-sno-{{okd_cluster_name}}"
+  tags: always
+- set_fact:
+    cluster_exists: true
+    okd_cluster_id: "{{item.id}}"
+
+  with_items: "{{clusters_out.json}}"   
+  when: item.name ==  okd_cluster_name
+  no_log: true
+  tags: always
+
+- assert:
+    quiet: true
+    that: 
+      - cluster_exists is not defined
+    fail_msg: "cluster {{okd_cluster_name}} already exists"
+  when: force_create is not defined  or not force_create
+
+
+- name: remove cluster if exists and force_create is true
+  include: remove_cluster.yaml
+  when: cluster_exists is defined and cluster_exists
+
+- include_tasks: create_assisted_cluster.yaml
+
+- name: Download OKD assisted installer ISO file
+  get_url:
+    url: "{{discovery_image_url}}"
+    dest: /tmp/discovery.iso
+
+- name: upload assisted discovery ISO
+  ovirt_disk:
+    name: "discovery-minimal-{{okd_cluster_name}}"
+    upload_image_path: /tmp/discovery.iso
+    storage_domain: "{{ovirt_storage_name}}"
+    auth: "{{ovirt_auth}}"
+    wait: true
+    bootable: true
+    format: raw
+    content_type: iso
+    force: true
+
+- ovirt_disk:
+    name: "Create an okd_root_disk disk"
+    auth: "{{ovirt_auth}}"
+    size: "{{okd_root_disk_size}}"
+    format: cow
+    storage_domain: "{{ovirt_storage_name}}"
+    
+- name: sleep for 10 seconds for ISO to be come ready
+  pause:
+    seconds: 10
+
+- name: provision Assisted SNO with ansible
+  ovirt_vm:
+    name: "{{okd_vm_name | default('okd-sno')}}"
+    cluster: "{{ovirt_cluster_name}}"
+    auth: "{{ovirt_auth}}"
+    memory: "{{okd_vm_memory_size}}"
+    cpu_cores: "{{okd_vm_cpu}}"
+    cpu_mode: host_passthrough
+    placement_policy: pinned
+    state: running
+    nics:
+      - name: eth0  
+        profile_name: "{{okd_rhv_network}}"
+        mac_address: "{{okd_vm_mac_address | default(omit)}}"
+    disks:
+      - name: "okd_root_disk-{{okd_cluster_name}}"
+        bootable: True        
+    cd_iso: "discovery-minimal-{{okd_cluster_name}}"
+    boot_devices:
+        - hd
+        - cdrom
+        
+- name: wait until the ready state is reached or until the timeout period ends.
+  uri:
+    url: "{{assisted_api_url}}/clusters/{{okd_cluster_id}}"
+    method: GET
+    headers:
+      Version: "4"
+      Content-Type: "application/json"
+      Accept: "application/json"
+    status_code: 200
+  register: cluster_info
+  until: cluster_info.json.status == "ready"
+  retries: 10
+  delay: 30
+
+- name: install_cluster
+  include_tasks: install_cluster.yaml
+
+
+- name: remove_cluster
+  include: remove_cluster.yaml
+  when: okd_cluster_id is  defined
+  tags: 
+    - never
+    - remove_cluster  
