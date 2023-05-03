@@ -53,7 +53,8 @@
     force: true
 
 - ovirt_disk:
-    name: "Create an okd_root_disk disk"
+  name: "Create an okd_root_disk disk"
+    name: "okd_root_disk-{{okd_cluster_name}}"
     auth: "{{ovirt_auth}}"
     size: "{{okd_root_disk_size}}"
     format: cow
