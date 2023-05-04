@@ -200,6 +200,9 @@ oc wait pods -n kubevirt-hyperconverged -l name=hyperconverged-cluster-webhook -
 # retry until success
 timeout 5m bash -c "source utils.sh ; until k8s_apply_hyperconverged ; do sleep 20; done"
 
+# make sure all the HCO components are finished
+oc wait HyperConverged kubevirt-hyperconverged -n kubevirt-hyperconverged --for=condition=Available --timeout=15m
+
 }
 
 
