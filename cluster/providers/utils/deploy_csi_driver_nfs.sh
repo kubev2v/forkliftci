@@ -20,7 +20,7 @@ provisioner: nfs.csi.k8s.io
 parameters:
   server: ${nfs_server_ip}
   share: ${nfs_share}
-  subDir: nfs-csi/\${pvc.metadata.namespace}/\${pvc.metadata.name}  
+  subDir: nfs-csi
   # csi.storage.k8s.io/provisioner-secret is only needed for providing mountOptions in DeleteVolume
   csi.storage.k8s.io/provisioner-secret-name: "mount-options"
   csi.storage.k8s.io/provisioner-secret-namespace: "default"

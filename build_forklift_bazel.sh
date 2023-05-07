@@ -9,6 +9,9 @@ PROVIDER_NAME=${1:-all}
 
 echo "Building for provider ${PROVIDER_NAME}"
 
+echo "gh workspace"
+find ${GITHUB_WORKSPACE}/../../ | grep WORKSPACE
+
 [ ! -d ${FORKLIFT_DIR:-forklift} ] && FORKLIFT_DIR="${SCRIPT_DIR}/forklift"
 
 # verify there is WORKSPACE file
