@@ -117,6 +117,93 @@ function packstack_create_cirros {
     openstack server create --image cirros --flavor m1.tiny --wait cirros --network net-int
 }
 
+
+# create self signed SSL keys
+function create_certs {
+    
+    mkdir /tmp/self-certs
+    cd /tmp/self-certs
+        # Create the CA + key
+    openssl req \
+        -new \
+        -newkey rsa:4096 \
+        -days 365 \
+        -nodes \
+        -x509 \
+        -subj "/CN=ca_org" \
+        -keyout ca-key.pem \
+        -out ca.pem
+
+    # create new cert key and req
+    openssl genrsa -out cert-key.pem
+    openssl req -new -sha256 -subj "/CN=yourcn" -key cert-key.pem -out cert.csr 
+
+
+    host=$(hostname)
+    ip=$(hostname -i)
+    echo "subjectAltName=DNS:packstack.konveyor-forklift,DNS:${host},IP:${ip}" >> extfile.cnf 
+    openssl x509 -req -sha256 -days 365 -in cert.csr -CA ca.pem -CAkey ca-key.pem -out cert.pem -extfile extfile.cnf -CAcreateserial
+
+    cp cert.pem /etc/ssl/packstack.pem
+    cp cert-key.pem /etc/ssl/packstack-key.pem
+    cp ca.pem /etc/pki/ca-trust/source/anchors/packstack-ca.pem
+
+    update-ca-trust
+
+}
+
+function add_apache_keystone_ssl {
+    host=$(hostname)
+    cat << EOF >>/etc/httpd/conf.modules.d/00-ssl.conf
+    LoadModule ssl_module modules/mod_ssl.so
+    LoadModule socache_shmcb_module  modules/mod_socache_shmcb.so
+EOF
+
+
+    echo "Listen 5001" >>/etc/httpd/conf/ports.conf
+
+    cat << EOF >/etc/httpd/conf.d/11-keystone_secure_wsgi.conf
+    <VirtualHost *:5001>
+    ServerName ${host}
+    ## Vhost docroot
+    DocumentRoot "/var/www/cgi-bin/keystone"
+
+    ## Directories, there should at least be a declaration for /var/www/cgi-bin/keystone
+
+    <Directory "/var/www/cgi-bin/keystone">
+        Options -Indexes +FollowSymLinks +MultiViews
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    ## Logging
+    ErrorLog "/var/log/httpd/keystone_wsgi_secure_error.log"
+    ServerSignature Off
+    CustomLog "/var/log/httpd/keystone_wsgi_secure_access.log" combined
+    SetEnvIf X-Forwarded-Proto https HTTPS=1
+
+
+    ## WSGI configuration
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIDaemonProcess keystone_secure display-name=keystone group=keystone processes=2 threads=1 user=keystone
+    WSGIProcessGroup keystone_secure
+    WSGIScriptAlias / "/var/www/cgi-bin/keystone/keystone"
+    WSGIPassAuthorization On
+
+
+    SSLEngine on
+    SSLCertificateFile "/etc/ssl/packstack.pem"
+    SSLCertificateKeyFile "/etc/ssl/packstack-key.pem"
+
+    </VirtualHost>
+EOF
+
+    systemctl restart httpd || { journalctl -u  httpd | tail ; return 2 ; }
+    curl https://$(hostname):5001/v3/
+
+}
+
+
 function packstack_create_cirros_volume { 
     source /root/keystonerc_admin
 

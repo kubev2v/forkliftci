@@ -4,11 +4,16 @@ source ./cluster/common.sh
 # if none is provided set to all by default
 [ ! -z "${PROVIDER_NAME}" ] || PROVIDER_NAME="all"
 
+# if no keystone_ssl env is provided set to true by default
+[ ! -z "${KEYSTONE_USE_SSL}" ] || KEYSTONE_USE_SSL=true
+
 # When running from the CI: find the runner IP Address will be used as NFS server.
 export NFS_IP_ADDRESS=$(ip route get 8.8.8.8 | awk '{ print $7 }' | head -1)
 # set NFS_SHARE for CI
 export NFS_SHARE="/home/nfsshare"
 export INSTALL_NFS=true
+export KEYSTONE_USE_SSL
+
 
 echo "::group::kind_installation"
 . ./cluster/kind/kind_with_registry.sh

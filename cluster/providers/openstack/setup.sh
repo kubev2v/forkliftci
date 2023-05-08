@@ -20,3 +20,7 @@ run_command_deployment packstack_update_endpoints
 run_command_deployment packstack_patch_snapshots_support
 run_command_deployment packstack_update_nfs_path  "${NFS_IP_ADDRESS}:${NFS_SHARE}"
 run_command_deployment healthcheck
+
+# add keystone SSL on port 5001
+[ -z "${KEYSTONE_USE_SSL}" ] || run_command_deployment create_certs
+[ -z "${KEYSTONE_USE_SSL}" ] || run_command_deployment add_apache_keystone_ssl

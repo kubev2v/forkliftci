@@ -25,6 +25,7 @@ spec:
               - ALL
         ports:
         - containerPort: 5000
+        - containerPort: 5001        
         - containerPort: 8774        
         - containerPort: 8775
         - containerPort: 8778
@@ -64,6 +65,9 @@ spec:
     app: packstack
   type: NodePort
   ports:
+  - name: keystone-api-ssl
+    port: 5001
+    nodePort: 30051  
   - name: keystone-api
     port: 5000
     nodePort: 30050
