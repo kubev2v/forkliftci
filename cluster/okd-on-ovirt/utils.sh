@@ -184,7 +184,6 @@ spec:
   sourceNamespace: openshift-marketplace
   name: community-kubevirt-hyperconverged
   channel: "stable" 
-  startingCSV: kubevirt-hyperconverged-operator.v1.8.1
   installPlanApproval: Automatic
 EOF
 
