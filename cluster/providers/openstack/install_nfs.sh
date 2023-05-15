@@ -1,6 +1,7 @@
  #!/bin/bash
 
 if [  -n "$(uname -a | grep Ubuntu)" ]; then
+    sudo apt-get update -y
     sudo apt install nfs-kernel-server -y   
 else
     sudo dnf install nfs-utils -y
