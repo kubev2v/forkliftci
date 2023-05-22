@@ -1,0 +1,146 @@
+---
+  - name: provision test VM on ovirt
+    hosts: localhost
+    vars:
+      engine_fqdn: "{{ ovirt_engine_url }}"
+      engine_user: "{{ ovirt_engine_username }}"
+      engine_password: "{{ ovirt_engine_password }}"
+    collections:
+      - ovirt.ovirt
+      - ansible.posix
+
+    tasks:
+      - name: login to ovirt
+        include_role:
+          name: okd-on-ovirt
+          tasks_from: login_to_ovirt 
+          apply:
+            tags:
+              - always
+        tags:
+          - always          
+
+    
+      - name: provision VM with cloud init
+        ovirt_vm:
+          name: "gh_runner_vm"
+          template: "{{ovirt_runner_template_name}}"
+          cluster: "{{ovirt_cluster_name}}"
+          auth: "{{ovirt_auth}}"
+          memory: 14GiB
+          cpu_cores: 12
+          state: running
+          bios_type: "i440fx_sea_bios"
+          nics:
+            - name: eth0
+              profile_name: "{{rhv_network}}"
+              mac_address: "{{test_vm_mac_address | default(omit)}}"
+
+          cloud_init:
+            nic_boot_protocol: "dhcp"
+            authorized_ssh_keys:  "{{ vm_ssh_public_key }}"
+            nic_name: eth0
+            dns_servers: 8.8.8.8
+            custom_script: |
+              write_files:
+              - content: |
+                  nameserver 8.8.8.8
+                path: /etc/resolv.conf
+                permissions: '0622'
+            user_name: root
+        delegate_to: localhost
+        register: instance_details
+
+
+      - ovirt_vm_info:
+          pattern: name=gh_runner_vm and cluster="{{ovirt_cluster_name}}"
+          auth: "{{ovirt_auth}}"
+          follow: ['reported_devices']
+        register: result
+        until: "result.ovirt_vms | ovirt.ovirt.ovirtvmipv4 | length > 0"
+        retries: 10
+        delay: 30
+
+      - set_fact:
+          collected_address: "{{ result.ovirt_vms | ovirt.ovirt.ovirtvmipv4 }}"
+    
+      - debug: msg="got VM IP {{collected_address}}"
+
+      - blockinfile:
+          path: /tmp/ssh-conf
+          create: yes
+          mode: 600
+          content: |
+            Host ovirt-proxy-vm-1.rhv45.gcp.devcluster.openshift.com
+              StrictHostKeyChecking no
+              UserKnownHostsFile /dev/null
+              IdentityFile /tmp/id_ssh_rsa
+
+            Host 192.168.225.*
+              ProxyJump installer@ovirt-proxy-vm-1.rhv45.gcp.devcluster.openshift.com
+              User root
+              StrictHostKeyChecking no
+              UserKnownHostsFile /dev/null
+              IdentityFile /tmp/id_ssh_rsa
+        tags:
+          - always          
+
+      - name: remove test-vm VM from the engine
+        ovirt_vm:
+          name: "gh_runner_vm"
+          state: absent
+          auth: "{{ovirt_auth}}"
+        tags:
+          - never
+          - cleanup  
+
+      - debug:
+          msg: "{{ result.ovirt_vms[0].id }}"
+
+      - shell: "echo {{ result.ovirt_vms[0].id }} >/tmp/test_output/test_vm_id"
+
+      - debug: var=output.stdout_lines                
+
+      - name: Add a host alias that we reach through a tunnel
+        add_host:
+          hostname: '{{ collected_address }}'
+          name: test-vm
+          ansible_ssh_host: '{{ collected_address }}'
+          ansible_ssh_user: root    
+          ansible_ssh_common_args: '-F /tmp/ssh-conf'      
+       
+      - name: check connectivity to the VM
+        ping:
+        delegate_to: test-vm
+
+      - name: run forklift e2e tests
+        block:
+        - name: Git checkout forkliftci
+          git:
+            repo: 'https://github.com/kubev2v/forkliftci.git'
+            dest: ~/forkliftci
+            version: main 
+        - name: Git checkout forklift
+          git:
+            repo: 'https://github.com/kubev2v/forklift.git'
+            dest: ~/forkliftci/forklift
+            version: main            
+
+        - name: add docker-hub token
+          shell: |
+            echo "{{ docker_hub_token }}" | docker login --username "{{  docker_hub_user }}" --password-stdin
+          no_log: true
+
+        - name: install-CI-env
+          shell: |
+            cd ~/forkliftci
+            export PROVIDER_NAME=openstack
+            ./build_and_setup_everything_bazel.sh
+
+        - name: run-openstack-e2e-test
+          shell: |
+            cd ~/forkliftci/forklift
+            make e2e-sanity-openstack
+
+        delegate_to: test-vm             
+

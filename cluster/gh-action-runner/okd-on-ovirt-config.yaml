@@ -4,6 +4,7 @@ ovirt_cluster_name: OCP-45
 ovirt_glance_template_name: Fedora 34 Cloud Base Image v1.2 for x86_64
 ovirt_template_name: fedora_34
 ansible_runner_image: quay.io/ovirt/ansible-runner:ovirt-46
+ovirt_runner_template_name: fedora-36-gh-runner
 
 # delete okd cluster if already exists - default false
 #force_create: false

@@ -237,32 +237,26 @@
 
         delegate_to: test-vm
         tags:
-          - install-dev         
+          - install-dev           
 
-      - name: clone forklift repos
-        block:
-        - name: Git checkout forkliftci
-          git:
-            repo: 'https://github.com/kubev2v/forkliftci.git'
-            dest: ~/forkliftci
-            version: main 
-        - name: Git checkout forklift
-          git:
-            repo: 'https://github.com/kubev2v/forklift.git'
-            dest: ~/forkliftci/forklift
-            version: main            
+      - name: stop the VM
+        ovirt_vm:
+          name: "fedora_test_vm"
+          cluster: "{{ovirt_cluster_name}}"
+          auth: "{{ovirt_auth}}"
+          state: stopped
 
-        - name: install-CI-env
-          shell: |
-            cd ~/forkliftci
-            export PROVIDER_NAME=openstack
-            ./build_and_setup_everything_bazel.sh
-
-        - name: run-openstack-e2e-test
-          shell: |
-            cd ~/forkliftci/forklift
-            make e2e-sanity-openstack
-            
-        delegate_to: test-vm            
-
+      - name: Create template from VM
+        ovirt_template:
+          auth: "{{ ovirt_auth }}"
+          cluster: "{{ovirt_cluster_name}}"
+          name: "{{ ovirt_runner_template_name }}"
+          vm: "fedora_test_vm"
+          
+      - name: remove test-vm VM from the engine
+        ovirt_vm:
+          name: "fedora_test_vm"
+          state: absent
+          auth: "{{ovirt_auth}}"
+ 
             
