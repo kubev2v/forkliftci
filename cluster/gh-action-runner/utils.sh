@@ -8,6 +8,20 @@ SCRIPT_PATH=`realpath "$0"`
 SCRIPT_DIR=`dirname "$SCRIPT_PATH"`
 source ${SCRIPT_DIR}/../common.sh
 
+function gh_action_register_runner
+ {
+    docker run --privileged  \
+    -e HOME=/home/runner \
+    -v /tmp/id_ssh_rsa:/tmp/id_ssh_rsa \
+    -v /tmp/test_output:/tmp/test_output \
+    -v /tmp/id_ssh_rsa.pub:/tmp/id_ssh_rsa.pub \
+    -u root:root \
+    -v ${SCRIPT_DIR}/../okd-on-ovirt/roles/okd-on-ovirt:/home/runner/.ansible/roles/okd-on-ovirt \
+    -v $(pwd)/:/home/runner/test-runner/ \
+    -w /home/runner/test-runner \
+    $(get_conf_value "${CONF_PATH}" "ansible_runner_image") \
+    ansible-playbook gh-action-runner-register-gh-action.yml -e@"${CONF_PATH}" -e@"${SECRETS_PATH}" $@
+}
 
 function gh_action_runner_create
  {

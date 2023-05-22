@@ -113,34 +113,33 @@
         ping:
         delegate_to: test-vm
 
-      - name: run forklift e2e tests
-        block:
-        - name: Git checkout forkliftci
-          git:
-            repo: 'https://github.com/kubev2v/forkliftci.git'
-            dest: ~/forkliftci
-            version: main 
-        - name: Git checkout forklift
-          git:
-            repo: 'https://github.com/kubev2v/forklift.git'
-            dest: ~/forkliftci/forklift
-            version: main            
+      # - name: run forklift e2e tests
+      #   block:
+      #   - name: Git checkout forkliftci
+      #     git:
+      #       repo: 'https://github.com/kubev2v/forkliftci.git'
+      #       dest: ~/forkliftci
+      #       version: main 
+      #   - name: Git checkout forklift
+      #     git:
+      #       repo: 'https://github.com/kubev2v/forklift.git'
+      #       dest: ~/forkliftci/forklift
+      #       version: main            
 
-        - name: add docker-hub token
-          shell: |
-            echo "{{ docker_hub_token }}" | docker login --username "{{  docker_hub_user }}" --password-stdin
-          no_log: true
+      #   - name: add docker-hub token
+      #     shell: |
+      #       echo "{{ docker_hub_token }}" | docker login --username "{{  docker_hub_user }}" --password-stdin
+      #     no_log: true
 
-        - name: install-CI-env
-          shell: |
-            cd ~/forkliftci
-            export PROVIDER_NAME=openstack
-            ./build_and_setup_everything_bazel.sh
+      #   - name: install-CI-env
+      #     shell: |
+      #       cd ~/forkliftci
+      #       export PROVIDER_NAME=openstack
+      #       ./build_and_setup_everything_bazel.sh
 
-        - name: run-openstack-e2e-test
-          shell: |
-            cd ~/forkliftci/forklift
-            make e2e-sanity-openstack
-
-        delegate_to: test-vm             
+      #   - name: run-openstack-e2e-test
+      #     shell: |
+      #       cd ~/forkliftci/forklift
+      #       make e2e-sanity-openstack
+      #  delegate_to: test-vm             
 
