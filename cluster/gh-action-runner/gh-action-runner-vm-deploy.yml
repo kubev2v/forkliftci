@@ -257,6 +257,12 @@
             cd ~/forkliftci
             export PROVIDER_NAME=openstack
             ./build_and_setup_everything_bazel.sh
+
+        - name: run-openstack-e2e-test
+          shell: |
+            cd ~/forkliftci/forklift
+            make e2e-sanity-openstack
+            
         delegate_to: test-vm            
 
             
