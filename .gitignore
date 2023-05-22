@@ -1,2 +1,3 @@
 .vscode/tasks.json
 cluster/okd-on-ovirt/.conf/*
+cluster/gh-action-runner/.conf/*

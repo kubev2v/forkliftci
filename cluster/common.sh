@@ -1,5 +1,22 @@
 #!/bin/bash
 
+function get_conf_value {
+local conf_path=$1
+local key=$2
+val=$(python3 -c 'import yaml;import sys; \
+data = yaml.full_load(open(sys.argv[1])); \
+print(data[sys.argv[2]])' ${conf_path} ${key})
+echo ${val}
+}
+
+function decode_secrets {
+  cat ${SECRETS_PATH}.b64 | base64 -d >${SECRETS_PATH}.2
+}
+function generate_b64_conf {
+  base64 -w 0 ${SECRETS_PATH} >${SECRETS_PATH}.b64
+}
+
+
 # grant admin rights so its token can be used to access the API
 function k8s_grant_permissions {
     USER=system:bootstrap:`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-id}' | base64 -d`
