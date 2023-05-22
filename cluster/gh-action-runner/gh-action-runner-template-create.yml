@@ -1,0 +1,279 @@
+---
+  - name: provision test VM on ovirt
+    hosts: localhost
+    vars:
+      engine_fqdn: "{{ ovirt_engine_url }}"
+      engine_user: "{{ ovirt_engine_username }}"
+      engine_password: "{{ ovirt_engine_password }}"
+      docker_ce_repo_url: https://download.docker.com/linux/fedora
+      docker_ce_repo_file_url: "{{ docker_ce_repo_url }}/docker-ce.repo"
+      docker_ce_gpg_key: "{{ docker_ce_repo_url }}/gpg"
+      docker_ce_edge_repo_url: "{{ docker_ce_repo_url }}/{{ ansible_distribution_major_version }}/$basearch/edge"
+    collections:
+      - ovirt.ovirt
+      - ansible.posix
+
+    tasks:
+      - name: login to ovirt
+        include_role:
+          name: okd-on-ovirt
+          tasks_from: login_to_ovirt 
+          apply:
+            tags:
+              - always
+        tags:
+          - always          
+
+      - ovirt_template:
+          state: imported
+          auth: "{{ovirt_auth}}"
+          name: "{{ovirt_template_name}}"
+          image_disk: "{{ovirt_glance_template_name}}"
+          template_image_disk_name: centos7_from_glance
+          image_provider: "ovirt-image-repository"
+          storage_domain: "{{ovirt_storage_name}}"
+          cluster: "{{ovirt_cluster_name}}"
+
+      - name: provision VM with cloud init
+        ovirt_vm:
+          name: "fedora_test_vm"
+          template: "{{ovirt_template_name}}"
+          cluster: "{{ovirt_cluster_name}}"
+          auth: "{{ovirt_auth}}"
+          memory: 14GiB
+          cpu_cores: 12
+          state: running
+          bios_type: "i440fx_sea_bios"
+          nics:
+            - name: eth0
+              profile_name: "{{rhv_network}}"
+              mac_address: "{{test_vm_mac_address | default(omit)}}"
+
+          cloud_init:
+            nic_boot_protocol: "dhcp"
+            authorized_ssh_keys:  "{{ vm_ssh_public_key }}"
+            nic_name: eth0
+            dns_servers: 8.8.8.8
+            custom_script: |
+              write_files:
+              - content: |
+                  nameserver 8.8.8.8
+                path: /etc/resolv.conf
+                permissions: '0622'
+            user_name: root
+        delegate_to: localhost
+        register: instance_details
+
+
+      - name: stop the VM
+        ovirt_vm:
+          name: "fedora_test_vm"
+          cluster: "{{ovirt_cluster_name}}"
+          auth: "{{ovirt_auth}}"
+          state: stopped
+
+      - ovirt_vm_info:
+          pattern: name=fedora_test_vm and cluster="{{ovirt_cluster_name}}"
+          auth: "{{ovirt_auth}}"
+          follow: ['disk_attachments']
+        register: result
+     
+      - debug:
+          msg: "{{ result  }}"
+
+      - name: Increase root disk size
+        ovirt_disk:
+          auth: "{{ ovirt_auth }}"
+          id: "{{ result.ovirt_vms[0].disk_attachments[0].disk.id }}"
+          size: "50GiB"
+          wait: true
+          vm_name: "fedora_test_vm"
+          bootable: true
+
+      - name: start the VM
+        ovirt_vm:
+          name: "fedora_test_vm"
+          cluster: "{{ovirt_cluster_name}}"
+          auth: "{{ovirt_auth}}"
+          state: running
+
+      - ovirt_vm_info:
+          pattern: name=fedora_test_vm and cluster="{{ovirt_cluster_name}}"
+          auth: "{{ovirt_auth}}"
+          follow: ['reported_devices']
+        register: result
+        until: "result.ovirt_vms | ovirt.ovirt.ovirtvmipv4 | length > 0"
+        retries: 10
+        delay: 30
+
+      - set_fact:
+          collected_address: "{{ result.ovirt_vms | ovirt.ovirt.ovirtvmipv4 }}"
+    
+      - debug: msg="got VM IP {{collected_address}}"
+
+      - blockinfile:
+          path: /tmp/ssh-conf
+          create: yes
+          mode: 600
+          content: |
+            Host ovirt-proxy-vm-1.rhv45.gcp.devcluster.openshift.com
+              StrictHostKeyChecking no
+              UserKnownHostsFile /dev/null
+              IdentityFile /tmp/id_ssh_rsa
+
+            Host 192.168.225.*
+              ProxyJump installer@ovirt-proxy-vm-1.rhv45.gcp.devcluster.openshift.com
+              User root
+              StrictHostKeyChecking no
+              UserKnownHostsFile /dev/null
+              IdentityFile /tmp/id_ssh_rsa
+        tags:
+          - always          
+
+      - name: remove test-vm VM from the engine
+        ovirt_vm:
+          name: "fedora_test_vm"
+          state: absent
+          auth: "{{ovirt_auth}}"
+        tags:
+          - never
+          - cleanup  
+
+      - debug:
+          msg: "{{ result.ovirt_vms[0].id }}"
+
+      - shell: "echo {{ result.ovirt_vms[0].id }} >/tmp/test_output/test_vm_id"
+
+      - debug: var=output.stdout_lines                
+
+      - name: Add a host alias that we reach through a tunnel
+        add_host:
+          hostname: '{{ collected_address }}'
+          name: test-vm
+          ansible_ssh_host: '{{ collected_address }}'
+          ansible_ssh_user: root    
+          ansible_ssh_common_args: '-F /tmp/ssh-conf'      
+      
+      - name: check connectivity to the VM
+        ping:
+        delegate_to: test-vm
+
+      - name: resize the root partition 
+        shell: |
+          growpart  /dev/vda 1
+          resize2fs /dev/vda1
+        delegate_to: test-vm
+
+      - name: upgrade to fedora-36
+        block:
+        - name: install system upgrade plugin
+          dnf: name="dnf-plugin-system-upgrade" state=present  
+        - name: execute upgrade in system-upgrade mode
+          shell: dnf system-upgrade download --releasever=36 -y
+#           dnf system-upgrade download -y --allowerasing --best --releasever 36
+        - name: run system-upgrade reboot command
+          shell: 'sleep 2 && dnf system-upgrade reboot -y'
+          ignore_errors: true
+          async: 1
+          poll: 0
+        - name: wait for server to come back after reboot
+          wait_for_connection:
+        delegate_to: test-vm
+
+      - name: install pre-req
+        block:
+        - name: install-dev-tools
+          dnf: name="@Development tools" state=present       
+        - name: Development Libraries
+          dnf: name="@Development Libraries" state=present  
+        - name: Docker | CE | DNF | Deploy repository (systems without SNI)
+          shell: "dnf config-manager --add-repo {{ docker_ce_repo_file_url }}"
+          args:
+            creates: /etc/yum.repos.d/docker-ce.repo
+        - name: enable bazel repo
+          shell: "dnf copr enable vbatts/bazel -y"            
+        - name: install packages
+          dnf: 
+            name:
+              - git
+              - wget
+              - make
+              - glibc-static
+              - libstdc++-static
+              - docker-ce
+              - gh
+              - jq
+              - bazel5
+            state: latest
+
+        - name: start docker
+          systemd:
+            name: docker
+            state: started
+            enabled: true
+        - ansible.posix.sysctl:
+            name: fs.inotify.max_user_instances
+            value: '512'
+            sysctl_set: true
+            state: present            
+        - name: install golang
+          shell: |
+            wget https://go.dev/dl/go1.20.4.linux-amd64.tar.gz
+            tar -C /usr/local -xzf go1.20.4.linux-amd64.tar.gz
+
+        - name: install kubectl
+          shell: |
+            curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl
+            chmod +x /usr/local/bin/kubectl
+
+        - name: install k9s
+          shell: |
+            curl -L https://github.com/derailed/k9s/releases/download/v0.27.4/k9s_Linux_amd64.tar.gz -o /tmp/k9s.tar.gz
+            tar xfz /tmp/k9s.tar.gz -C /usr/local/bin/
+
+        - name: Add to PATH
+          copy:
+            content: "export PATH=$PATH:/usr/local/go/bin:~/go/bin"
+            dest: "/etc/profile.d/gh_runner.sh" 
+
+        - name: install  gh-action
+          include_role: 
+            name: monolithprojects.github_actions_runner
+          vars:
+            runner_user: root
+
+        delegate_to: test-vm
+        tags:
+          - install-dev           
+
+      - name: stop the VM
+        ovirt_vm:
+          name: "fedora_test_vm"
+          cluster: "{{ovirt_cluster_name}}"
+          auth: "{{ovirt_auth}}"
+          state: stopped
+
+      - name: Create template from VM
+        ovirt_template:
+          auth: "{{ ovirt_auth }}"
+          cluster: "{{ovirt_cluster_name}}"
+          name: "{{ ovirt_runner_template_name }}"
+          vm: "fedora_test_vm"
+
+      - name: remove test-vm VM from the engine
+        ovirt_vm:
+          name: "fedora_test_vm"
+          state: absent
+          auth: "{{ovirt_auth}}"
+
+      - name: Remove template - cleanup
+        ovirt_template:
+          auth: "{{ ovirt_auth }}"
+          cluster: "{{ovirt_cluster_name}}"
+          name: "{{ ovirt_runner_template_name }}"  
+          state: absent        
+        tags:
+          - never
+          - cleanup            
+ 
+            

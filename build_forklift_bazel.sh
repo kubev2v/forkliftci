@@ -9,14 +9,21 @@ PROVIDER_NAME=${1:-all}
 
 echo "Building for provider ${PROVIDER_NAME}"
 
+
+
+
+
 [ ! -d ${FORKLIFT_DIR:-forklift} ] && FORKLIFT_DIR="${SCRIPT_DIR}/forklift"
 
 # verify there is WORKSPACE file
-[ ! -e "${FORKLIFT_DIR:-forklift}/WORKSPACE" ] && { echo "couldnt find the forklift/ directory." ; exit 2; }
+[ ! -e "${FORKLIFT_DIR:-forklift}/WORKSPACE" ] && FORKLIFT_DIR="${SCRIPT_DIR}/forklift"
 
 
 # Change the dir to FORKLIFT_DIR (default forklift)
 cd ${FORKLIFT_DIR:-forklift}
+
+export XDG_RUNTIME_DIR="$(mktemp -p /tmp -d xdg-runtime-XXXXXX)" 
+
 
 export REGISTRY=localhost:5001
 export REGISTRY_TAG=latest

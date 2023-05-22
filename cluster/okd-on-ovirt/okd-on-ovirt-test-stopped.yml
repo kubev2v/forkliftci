@@ -48,7 +48,7 @@
 
           cloud_init:
             nic_boot_protocol: "dhcp"
-            authorized_ssh_keys:  "{{ okd_vm_ssh_public_key }}"
+            authorized_ssh_keys:  "{{ vm_ssh_public_key }}"
             nic_name: eth0
             dns_servers: 8.8.8.8
             custom_script: |
