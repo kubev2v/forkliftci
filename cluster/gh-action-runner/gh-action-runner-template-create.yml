@@ -233,7 +233,13 @@
         - name: Add to PATH
           copy:
             content: "export PATH=$PATH:/usr/local/go/bin:~/go/bin"
-            dest: "/etc/profile.d/gh_runner.sh"    
+            dest: "/etc/profile.d/gh_runner.sh" 
+
+        - name: install  gh-action
+          include_role: 
+            name: monolithprojects.github_actions_runner
+          vars:
+            runner_user: root
 
         delegate_to: test-vm
         tags:
@@ -252,11 +258,20 @@
           cluster: "{{ovirt_cluster_name}}"
           name: "{{ ovirt_runner_template_name }}"
           vm: "fedora_test_vm"
-          
+
       - name: remove test-vm VM from the engine
         ovirt_vm:
           name: "fedora_test_vm"
           state: absent
           auth: "{{ovirt_auth}}"
+
+      - name: Remove template - cleanup
+        ovirt_template:
+          auth: "{{ ovirt_auth }}"
+          cluster: "{{ovirt_cluster_name}}"
+          name: "{{ ovirt_runner_template_name }}"          
+        tags:
+          - never
+          - cleanup            
  
             
