@@ -21,30 +21,11 @@ jobs:
 
       - name: Add cwd to path for kubectl.
         run: echo `pwd` >> $GITHUB_PATH
-
-      - name: Checkout forklift
-        uses: actions/checkout@v3
+      - name: build and setup everything
+        uses: ./ci/build-and-setup/
         with:
-          repository: kubev2v/forklift
-          path: forklift
-
-      - name: Bazel cache
-        id: bazel-cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-cache
-
-      - name: Get kubectl
-        run: curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-      - run: chmod u+x kubectl
-
-      - name: Set latest version of CDI
-        run: |
-          echo "CDI_VERSION=$(gh api repos/kubevirt/containerized-data-importer/releases/latest | jq -r .tag_name)" >> $GITHUB_ENV
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: build_and_setup_everything_bazel.sh
+          provider_name: all
+          gh_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: kubectl version
 
@@ -63,6 +44,12 @@ jobs:
       - run: echo "CLUSTER=`kind get kubeconfig | grep server | cut -d ' ' -f6`" >> $GITHUB_ENV
       - run: echo "TOKEN=`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-id}' | base64 -d`.`kubectl get secrets -n kube-system -o jsonpath='{.items[0].data.token-secret}' | base64 -d`" >> $GITHUB_ENV 
 
+      - name: save logs
+        if: ${{ always() }}
+        uses: ./ci/save-artifacts/
+        with:
+          source_provider: all
+              
       - name: Test call to Forklift
         run: |
           curl -k "$CLUSTER/apis/forklift.konveyor.io/v1beta1/namespaces/konveyor-forklift/providers" --header "Authorization: Bearer $TOKEN"

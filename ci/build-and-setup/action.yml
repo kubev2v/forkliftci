@@ -48,7 +48,8 @@ runs:
     - name: Build and setup everything with bazel
       shell: bash
       run: |
-        (cd ${{ github.action_path }}; FORKLIFT_DIR=$GITHUB_WORKSPACE build_and_setup_everything_bazel.sh)
+        echo $GITHUB_WORKSPACE
+        FORKLIFT_DIR=$GITHUB_WORKSPACE/forklift build_and_setup_everything_bazel.sh
       env:
         PROVIDER_NAME: ${{ inputs.provider_name }}
 
