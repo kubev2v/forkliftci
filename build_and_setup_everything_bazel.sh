@@ -4,8 +4,8 @@ source ./cluster/common.sh
 # if none is provided set to all by default
 [ ! -z "${PROVIDER_NAME}" ] || PROVIDER_NAME="all"
 
-# if no keystone_ssl env is provided set to true by default
-[ ! -z "${KEYSTONE_USE_SSL}" ] || KEYSTONE_USE_SSL=true
+# if no keystone_ssl env is provided set to false by default
+[ ! -z "${KEYSTONE_USE_SSL}" ] || KEYSTONE_USE_SSL=false
 
 # When running from the CI: find the runner IP Address will be used as NFS server.
 export NFS_IP_ADDRESS=$(ip route get 8.8.8.8 | awk '{ print $7 }' | head -1)
