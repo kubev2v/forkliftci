@@ -5,6 +5,8 @@ ovirt_glance_template_name: Fedora 34 Cloud Base Image v1.2 for x86_64
 ovirt_template_name: fedora_34
 ansible_runner_image: quay.io/ovirt/ansible-runner:ovirt-46-gh-runner
 ovirt_runner_template_prefix: fedora-36-gh
+ovirt_vm_memory: "14GiB"
+ovirt_vm_cpu_cores: 12
 ovirt_runner_template_name: "{{ovirt_runner_template_prefix}}_{{github_repo}}_{{github_account}}"
 # delete okd cluster if already exists - default false
 #force_create: false

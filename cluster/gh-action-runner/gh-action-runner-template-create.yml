@@ -5,10 +5,15 @@
       engine_fqdn: "{{ ovirt_engine_url }}"
       engine_user: "{{ ovirt_engine_username }}"
       engine_password: "{{ ovirt_engine_password }}"
+      ovirt_vm_name: "fedora_test_vm"
       docker_ce_repo_url: https://download.docker.com/linux/fedora
       docker_ce_repo_file_url: "{{ docker_ce_repo_url }}/docker-ce.repo"
       docker_ce_gpg_key: "{{ docker_ce_repo_url }}/gpg"
       docker_ce_edge_repo_url: "{{ docker_ce_repo_url }}/{{ ansible_distribution_major_version }}/$basearch/edge"
+      version_fedora: 36
+      version_go: "1.20.4"
+      version_k9s: "0.27.4"
+
     collections:
       - ovirt.ovirt
       - ansible.posix
@@ -24,30 +29,31 @@
         tags:
           - always          
 
-      - ovirt_template:
+      - name: Import template from public glance
+        ovirt_template:
           state: imported
-          auth: "{{ovirt_auth}}"
-          name: "{{ovirt_template_name}}"
-          image_disk: "{{ovirt_glance_template_name}}"
+          auth: "{{ ovirt_auth }}"
+          name: "{{ ovirt_template_name }}"
+          image_disk: "{{ ovirt_glance_template_name }}"
           template_image_disk_name: centos7_from_glance
           image_provider: "ovirt-image-repository"
-          storage_domain: "{{ovirt_storage_name}}"
-          cluster: "{{ovirt_cluster_name}}"
+          storage_domain: "{{ ovirt_storage_name }}"
+          cluster: "{{ ovirt_cluster_name }}"
 
-      - name: provision VM with cloud init
+      - name: Provision a VM with cloud init
         ovirt_vm:
-          name: "fedora_test_vm"
-          template: "{{ovirt_template_name}}"
-          cluster: "{{ovirt_cluster_name}}"
-          auth: "{{ovirt_auth}}"
-          memory: 14GiB
-          cpu_cores: 12
+          name: "{{ ovirt_vm_name }}"
+          template: "{{ ovirt_template_name }}"
+          cluster: "{{ ovirt_cluster_name }}"
+          auth: "{{ ovirt_auth }}"
+          memory: "{{ ovirt_vm_memory }}"
+          cpu_cores: "{{ ovirt_vm_cpu_cores }}"
           state: running
           bios_type: "i440fx_sea_bios"
           nics:
             - name: eth0
-              profile_name: "{{rhv_network}}"
-              mac_address: "{{test_vm_mac_address | default(omit)}}"
+              profile_name: "{{ rhv_network }}"
+              mac_address: "{{ test_vm_mac_address | default(omit) }}"
 
           cloud_init:
             nic_boot_protocol: "dhcp"
@@ -67,19 +73,19 @@
 
       - name: stop the VM
         ovirt_vm:
-          name: "fedora_test_vm"
-          cluster: "{{ovirt_cluster_name}}"
-          auth: "{{ovirt_auth}}"
+          name: "{{ ovirt_vm_name }}"
+          cluster: "{{ ovirt_cluster_name }}"
+          auth: "{{ ovirt_auth }}"
           state: stopped
 
       - ovirt_vm_info:
-          pattern: name=fedora_test_vm and cluster="{{ovirt_cluster_name}}"
-          auth: "{{ovirt_auth}}"
+          pattern: name="{{ ovirt_vm_name }}" and cluster="{{ ovirt_cluster_name }}"
+          auth: "{{ ovirt_auth }}"
           follow: ['disk_attachments']
         register: result
      
       - debug:
-          msg: "{{ result  }}"
+          msg: "{{ result }}"
 
       - name: Increase root disk size
         ovirt_disk:
@@ -87,19 +93,19 @@
           id: "{{ result.ovirt_vms[0].disk_attachments[0].disk.id }}"
           size: "50GiB"
           wait: true
-          vm_name: "fedora_test_vm"
+          vm_name: "{{ ovirt_vm_name }}"
           bootable: true
 
       - name: start the VM
         ovirt_vm:
-          name: "fedora_test_vm"
-          cluster: "{{ovirt_cluster_name}}"
-          auth: "{{ovirt_auth}}"
+          name: "{{ ovirt_vm_name }}"
+          cluster: "{{ ovirt_cluster_name }}"
+          auth: "{{ ovirt_auth }}"
           state: running
 
       - ovirt_vm_info:
-          pattern: name=fedora_test_vm and cluster="{{ovirt_cluster_name}}"
-          auth: "{{ovirt_auth}}"
+          pattern: name="{{ ovirt_vm_name }}" and cluster="{{ ovirt_cluster_name }}"
+          auth: "{{ ovirt_auth }}"
           follow: ['reported_devices']
         register: result
         until: "result.ovirt_vms | ovirt.ovirt.ovirtvmipv4 | length > 0"
@@ -132,9 +138,9 @@
 
       - name: remove test-vm VM from the engine
         ovirt_vm:
-          name: "fedora_test_vm"
+          name: "{{ ovirt_vm_name }}"
           state: absent
-          auth: "{{ovirt_auth}}"
+          auth: "{{ ovirt_auth }}"
         tags:
           - never
           - cleanup  
@@ -164,15 +170,14 @@
           resize2fs /dev/vda1
         delegate_to: test-vm
 
-      - name: upgrade to fedora-36
+      - name: upgrade to fedora-{{ version_fedora }}
         block:
         - name: install system upgrade plugin
           dnf: name="dnf-plugin-system-upgrade" state=present  
         - name: execute upgrade in system-upgrade mode
-          shell: dnf system-upgrade download --releasever=36 -y
-#           dnf system-upgrade download -y --allowerasing --best --releasever 36
+          shell: dnf system-upgrade download --releasever={{ version_fedora }} -y
         - name: run system-upgrade reboot command
-          shell: 'sleep 2 && dnf system-upgrade reboot -y'
+          shell: 'dnf system-upgrade reboot -y'
           ignore_errors: true
           async: 1
           poll: 0
@@ -182,16 +187,24 @@
 
       - name: install pre-req
         block:
-        - name: install-dev-tools
-          dnf: name="@Development tools" state=present       
-        - name: Development Libraries
-          dnf: name="@Development Libraries" state=present  
+        - name: install Development tools
+          dnf: 
+            name: "@Development tools" 
+            state: present       
+
+        - name: install Development Libraries
+          dnf: 
+            name: "@Development Libraries" 
+            state: present  
+
         - name: Docker | CE | DNF | Deploy repository (systems without SNI)
           shell: "dnf config-manager --add-repo {{ docker_ce_repo_file_url }}"
           args:
             creates: /etc/yum.repos.d/docker-ce.repo
+
         - name: enable bazel repo
-          shell: "dnf copr enable vbatts/bazel -y"            
+          shell: "dnf copr enable vbatts/bazel -y" 
+
         - name: install packages
           dnf: 
             name:
@@ -211,15 +224,17 @@
             name: docker
             state: started
             enabled: true
+
         - ansible.posix.sysctl:
             name: fs.inotify.max_user_instances
             value: '512'
             sysctl_set: true
             state: present            
+
         - name: install golang
           shell: |
-            wget https://go.dev/dl/go1.20.4.linux-amd64.tar.gz
-            tar -C /usr/local -xzf go1.20.4.linux-amd64.tar.gz
+            wget https://go.dev/dl/go{{ version_go }}.linux-amd64.tar.gz
+            tar -C /usr/local -xzf go{{ version_go }}.linux-amd64.tar.gz
 
         - name: install kubectl
           shell: |
@@ -228,7 +243,7 @@
 
         - name: install k9s
           shell: |
-            curl -L https://github.com/derailed/k9s/releases/download/v0.27.4/k9s_Linux_amd64.tar.gz -o /tmp/k9s.tar.gz
+            curl -L https://github.com/derailed/k9s/releases/download/v{{ version_k9s }}/k9s_Linux_amd64.tar.gz -o /tmp/k9s.tar.gz
             tar xfz /tmp/k9s.tar.gz -C /usr/local/bin/
 
         - name: Add to PATH
@@ -248,28 +263,28 @@
 
       - name: stop the VM
         ovirt_vm:
-          name: "fedora_test_vm"
-          cluster: "{{ovirt_cluster_name}}"
-          auth: "{{ovirt_auth}}"
+          name: "{{ ovirt_vm_name }}"
+          cluster: "{{ ovirt_cluster_name }}"
+          auth: "{{ ovirt_auth }}"
           state: stopped
 
       - name: Create template from VM
         ovirt_template:
           auth: "{{ ovirt_auth }}"
-          cluster: "{{ovirt_cluster_name}}"
+          cluster: "{{ ovirt_cluster_name }}"
           name: "{{ ovirt_runner_template_name }}"
-          vm: "fedora_test_vm"
+          vm: "{{ ovirt_vm_name }}"
 
       - name: remove test-vm VM from the engine
         ovirt_vm:
-          name: "fedora_test_vm"
+          name: "{{ ovirt_vm_name }}"
           state: absent
-          auth: "{{ovirt_auth}}"
+          auth: "{{ ovirt_auth }}"
 
       - name: Remove template - cleanup
         ovirt_template:
           auth: "{{ ovirt_auth }}"
-          cluster: "{{ovirt_cluster_name}}"
+          cluster: "{{ ovirt_cluster_name }}"
           name: "{{ ovirt_runner_template_name }}"  
           state: absent        
         tags:
