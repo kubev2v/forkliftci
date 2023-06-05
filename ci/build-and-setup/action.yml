@@ -49,7 +49,7 @@ runs:
       shell: bash
       run: |
         echo $GITHUB_WORKSPACE
-        FORKLIFT_DIR=$GITHUB_WORKSPACE/forklift build_and_setup_everything_bazel.sh
+        FORKLIFT_DIR=$GITHUB_WORKSPACE/forklift ./build_and_setup_everything_bazel.sh
       env:
         PROVIDER_NAME: ${{ inputs.provider_name }}
 
