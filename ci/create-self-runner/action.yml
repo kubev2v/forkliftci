@@ -1,15 +1,24 @@
 ---
 name: create self hosted runner
 description: create self hosted runner
+inputs:
+  perform_cleanup:
+    description: 'do we want to perform env cleanup'
+    required: true
+    default: false
+    type: boolean 
 
 runs:
   using: composite
   steps:
-    - name: run hosted_runner deployment
+    - name: run hosted_runner deployment 
       shell: bash
       run: |
         cd ${{github.action_path}}/../../cluster/gh-action-runner/
         source utils.sh
+
+        # if cleanup requested - do it and and bail-out
+        [ ${{ inputs.perform_cleanup  }} ==  "true" ]  && { gh_action_runner_create -t cleanup ; exit ; }
 
         gh_action_template_create
 
