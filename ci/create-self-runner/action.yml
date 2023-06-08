@@ -1,11 +1,6 @@
 ---
 name: create self hosted runner
 description: create self hosted runner
-inputs:
-  OKD_ENGINE_SECRETS:
-    required: true
-  OKD_SSH_KEY:
-    required: true
 
 runs:
   using: composite
@@ -14,18 +9,8 @@ runs:
       shell: bash
       run: |
         cd ${{github.action_path}}/../../cluster/gh-action-runner/
-        pwd
         source utils.sh
-        
-        mkdir .conf/
-        echo ${{ inputs.OKD_ENGINE_SECRETS }} >${SECRETS_PATH}.b64
-        echo ${{ inputs.OKD_SSH_KEY }}  >>/tmp/id_ssh_rsa.b64
-        cat ${SECRETS_PATH}.b64 | base64 -d >${SECRETS_PATH}
-        cat /tmp/id_ssh_rsa.b64 | base64 -d >/tmp/id_ssh_rsa
-        sudo chown root:root /tmp/id_ssh_rsa
-        sudo chmod 600 /tmp/id_ssh_rsa
-        # deploy okd on ovirt using ansible
-        #create fedora template (if missing)
+
         gh_action_template_create
 
         #create a runner VM from the template
