@@ -27,7 +27,13 @@ jobs:
         with:
           repository: kubev2v/forklift
           path: forklift
-          
+
+      - name: prepare the secrets
+        uses: ./ci/prepare-ansible-secrets
+        with:
+          OKD_ENGINE_SECRETS: ${{ secrets.OKD_ENGINE_SECRETS }}
+          OKD_SSH_KEY: ${{ secrets.OKD_SSH_KEY }
+
       - name: run OKD deployment
         shell: bash
         run: |
@@ -103,40 +109,11 @@ jobs:
           download_virtctl
           run_virtctl_cmd_timeout
 
-
-
-      - name: save k8s logs
-        if: always()
-        run: |
-          cd ${GITHUB_WORKSPACE}/cluster/okd-on-ovirt/
-          source utils.sh
-          mkdir /tmp/artifacts/
-          set +e
-          kubectl get pods -n konveyor-forklift >> /tmp/artifacts/k8s-pods.log
-          kubectl get events --field-selector type!=Normal -A --sort-by='.lastTimestamp' >> /tmp/artifacts/k8s_abnormal_events.log
-          kubectl get all -n konveyor-forklift -o yaml >> /tmp/artifacts/k8s-all-forklift-objects.log
-          kubectl get migrations -A -o yaml >> /tmp/artifacts/k8s-all-migrations.log
-          kubectl get plans -A -o yaml >> /tmp/artifacts/k8s-all-plans.log
-          kubectl get Virtualmachines -A -o yaml >> /tmp/artifacts/k8s-all-Virtualmachines.log
-          kubectl logs -n konveyor-forklift $(kubectl get po -n konveyor-forklift  -o=name | grep forklift-controller) >> /tmp/artifacts/k8s-forklift-controller-inventory.log
-          kubectl get Storageclasses -A -o yaml >> /tmp/artifacts/k8s-storage-classes.log
-
-          # CRDs in e2e-tests generated Namespace
-          generatedNS=$(kubectl get ns -o=name |grep forklift-e2e-tests | cut -d/ -f2)
-          kubectl describe pods -n ${generatedNS} >> /tmp/artifacts/k8s-pods-describe-forklift-tests.log
-          kubectl get events -n ${generatedNS} --sort-by='.lastTimestamp' >> /tmp/artifacts/k8s-events-forklift-tests.log
-          kubectl api-resources --verbs=list --namespaced -o name | grep forklift.konveyor.io | xargs -n 1 kubectl get -oyaml  --show-kind --ignore-not-found -n ${generatedNS}  >> /tmp/artifacts/k8s-objects-forklift-tests.log
-          
-          
-          kubectl describe pods -n konveyor-forklift >> /tmp/artifacts/k8s-pods-describe-konveyor-forklift.log
-
-          # CSI controller
-          kubectl logs -n kube-system $(kubectl get po -n kube-system  -o=name | grep csi-nfs-controller)  csi-provisioner >> /tmp/artifacts/k8s-csi-nfs-provisioner.log
-          kubectl logs -n kube-system $(kubectl get po -n kube-system  -o=name | grep csi-nfs-controller)  nfs >> /tmp/artifacts/k8s-csi-nfs.log
-          
-          # PVCs
-          kubectl get pvc -A >> /tmp/artifacts/k8s-pvc.log
-          kubectl logs -n konveyor-forklift $(kubectl get po -n konveyor-forklift  -o=name | grep forklift-volume-populator) >> /tmp/artifacts/k8s-forklift-volume-populator.log
+      - name: save logs
+        if: ${{ always() }}
+        uses: ./ci/save-artifacts/
+        with:
+          source_provider: ovirt
 
       - name: cleanup
         shell: bash
@@ -151,8 +128,4 @@ jobs:
           source utils.sh
           run_docker_ansible_cleanup
 
-      - uses: actions/upload-artifact@master
-        if: always()
-        with:
-          name: ovirt-k8s-forklift-logs
-          path: /tmp/artifacts
+
