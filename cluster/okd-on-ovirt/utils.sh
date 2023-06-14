@@ -303,5 +303,9 @@ function download_virtctl {
 }
 
 function run_virtctl_cmd_timeout {
-  sudo timeout 10m  bash -c "export KUBECONFIG=/tmp/kubeconfig ; until /tmp/bin/virtctl ssh root@fedora-test-vm -i /tmp/id_ssh_rsa --local-ssh -c hostname --local-ssh-opts='-o StrictHostKeyChecking=no'; do sleep 10 ; done "
+  export KUBECONFIG=/tmp/kubeconfig
+
+  # find the exported VM name (assumes it is the only existing VM)
+  export vm_name=$(oc get vm -o=json | jq '.items[0].metadata.name')
+  sudo timeout 10m  bash -c "export KUBECONFIG=/tmp/kubeconfig ; until /tmp/bin/virtctl ssh root@${vm_name} -i /tmp/id_ssh_rsa --local-ssh -c hostname --local-ssh-opts='-o StrictHostKeyChecking=no'; do sleep 10 ; done "
 }

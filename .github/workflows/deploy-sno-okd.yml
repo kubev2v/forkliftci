@@ -79,7 +79,9 @@ jobs:
           
           echo "OVIRT_VM_ID: ${OVIRT_VM_ID}"
           cd ${GITHUB_WORKSPACE}/forklift
-          KUBEVIRT_CLIENT_GO_SCHEME_REGISTRATION_VERSION=v1 go test ./tests/suit -v -ginkgo.focus ".*should create secure provider.*"
+          KUBEVIRT_CLIENT_GO_SCHEME_REGISTRATION_VERSION=v1 \
+          go test ./tests/suit -v \
+          -ginkgo.focus ".*secure flow.*" 
 
       - name: run virtctl - check if vm booted 
         shell: bash

@@ -12,6 +12,7 @@ runs:
       if: always()
       shell: bash
       run: |
+        export KUBECONFIG=/tmp/kubeconfig
         mkdir /tmp/artifacts/
         set +e
         kubectl get pods -n konveyor-forklift >> /tmp/artifacts/k8s-pods.log
@@ -58,7 +59,7 @@ runs:
         fi
         
         # export kind cluster full logs
-        kind export logs /tmp/artifacts/kind-logs
+        kind export logs /tmp/artifacts/kind-logs 2>/dev/null || true
 
     - name: upload artifacts
       uses: actions/upload-artifact@master
