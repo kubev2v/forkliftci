@@ -6,6 +6,10 @@ inputs:
     description: 'Access token that is used to access CDI repository'
   provider_name:
     description: 'specify which provider do we need to test'
+  enable_openstack_ssl:
+    description: 'use ssl on openstack keystone'
+    default: false
+    type: boolean
 outputs:
   cluster:
     value: ${{ steps.kind-outputs.outputs.cluster }}
@@ -49,6 +53,7 @@ runs:
       shell: bash
       run: |
         echo $GITHUB_WORKSPACE
+        export KEYSTONE_USE_SSL=${{ inputs.enable_openstack_ssl }}
         FORKLIFT_DIR=$GITHUB_WORKSPACE/forklift ./build_and_setup_everything_bazel.sh
       env:
         PROVIDER_NAME: ${{ inputs.provider_name }}
