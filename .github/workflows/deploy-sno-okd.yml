@@ -28,31 +28,12 @@ jobs:
           repository: kubev2v/forklift
           path: forklift
 
-      - name: prepare the secrets
-        uses: ./ci/prepare-ansible-secrets
-        with:
-          OKD_ENGINE_SECRETS: ${{ secrets.OKD_ENGINE_SECRETS }}
-          OKD_SSH_KEY: ${{ secrets.OKD_SSH_KEY }
-
       - name: run OKD deployment
-        shell: bash
-        run: |
-          cd ${GITHUB_WORKSPACE}/cluster/okd-on-ovirt/
-          source ../common.sh
-          source utils.sh
-          
-          mkdir .conf/
-          echo ${{ secrets.OKD_ENGINE_SECRETS }} >${SECRETS_PATH}.b64
-          echo ${{ secrets.OKD_SSH_KEY }}  >>/tmp/id_ssh_rsa.b64
-
-
-          cat ${SECRETS_PATH}.b64 | base64 -d >${SECRETS_PATH}
-          cat /tmp/id_ssh_rsa.b64 | base64 -d >/tmp/id_ssh_rsa
-          sudo chown root:root /tmp/id_ssh_rsa
-          sudo chmod 600 /tmp/id_ssh_rsa
-
-          # deploy okd on ovirt using ansible
-          run_docker_ansible_deploy
+        uses: ./ci/deploy-okd
+        with:
+          perform_cleanup: ${{ inputs.perform_cleanup }}
+          OKD_ENGINE_SECRETS: ${{ secrets.OKD_ENGINE_SECRETS }}
+          OKD_SSH_KEY: ${{ secrets.OKD_SSH_KEY }}
 
       - name: install hco & forklift 
         shell: bash
@@ -95,8 +76,10 @@ jobs:
 
           # export test variables for the tests
           export_test_var
+          
+          echo "OVIRT_VM_ID: ${OVIRT_VM_ID}"
           cd ${GITHUB_WORKSPACE}/forklift
-          make e2e-sanity-ovirt
+          KUBEVIRT_CLIENT_GO_SCHEME_REGISTRATION_VERSION=v1 go test ./tests/suit -v -ginkgo.focus ".*should create secure provider.*"
 
       - name: run virtctl - check if vm booted 
         shell: bash

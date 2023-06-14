@@ -1,0 +1,31 @@
+---
+name: deploy okd instance
+description: deploy okd instance
+inputs:
+  perform_cleanup:
+    description: 'do we want to perform env cleanup'
+    required: true
+    default: false
+    type: boolean 
+  OKD_ENGINE_SECRETS:
+    required: true
+  OKD_SSH_KEY:
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: run hosted_runner deployment 
+      shell: bash
+      run: |
+        cd ${{github.action_path}}/../../cluster/okd-on-ovirt/
+        source utils.sh
+        
+        mkdir .conf/
+        echo ${{ inputs.OKD_ENGINE_SECRETS }} >${SECRETS_PATH}.b64
+        echo ${{ inputs.OKD_SSH_KEY }}  >>/tmp/id_ssh_rsa.b64
+        cat ${SECRETS_PATH}.b64 | base64 -d >${SECRETS_PATH}
+        cat /tmp/id_ssh_rsa.b64 | base64 -d >/tmp/id_ssh_rsa
+        sudo chown root:root /tmp/id_ssh_rsa
+        sudo chmod 600 /tmp/id_ssh_rsa
+        
+        run_docker_ansible_deploy
