@@ -29,6 +29,16 @@
         tags:
           - always          
 
+      - name: Check if the template already exists
+        ovirt_template_info:
+          pattern: name="{{ ovirt_runner_template_name }}" and cluster="{{ ovirt_cluster_name }}"
+          auth: "{{ ovirt_auth }}"
+        register: result
+
+      - name: Template already exists - end
+        meta: end_play
+        when: "result.ovirt_templates | length > 0"
+
       - name: Import template from public glance
         ovirt_template:
           state: imported
