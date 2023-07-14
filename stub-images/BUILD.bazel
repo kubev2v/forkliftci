@@ -9,7 +9,7 @@ container_push(
     format = "Docker",
     image = "//stub-images/virt-v2v-stub:forklift-virt-v2v-stub",
     registry = "$${REGISTRY:-quay.io}",
-    repository = "$${REGISTRY_ACCOUNT:-}$${REGISTRY_ACCOUNT:+/}forklift-virt-v2v-stub",
+    repository = "$${REGISTRY_ORG:-}$${REGISTRY_ORG:+/}forklift-virt-v2v-stub",
     tag = "$${REGISTRY_TAG:-devel}",
 )
 
@@ -18,6 +18,6 @@ container_push(
     format = "Docker",
     image = "//stub-images/vddk-test-vmdk:vddk-test-image",
     registry = "$${REGISTRY:-quay.io}",
-    repository = "$${REGISTRY_ACCOUNT:-}$${REGISTRY_ACCOUNT:+/}vddk-test-vmdk",
+    repository = "$${REGISTRY_ORG:-}$${REGISTRY_ORG:+/}vddk-test-vmdk",
     tag = "$${REGISTRY_TAG:-devel}",
 )

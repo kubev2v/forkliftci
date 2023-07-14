@@ -22,23 +22,23 @@ echo "Building for provider ${PROVIDER_NAME}"
 # Change the dir to FORKLIFT_DIR (default forklift)
 cd ${FORKLIFT_DIR:-forklift}
 
-export XDG_RUNTIME_DIR="$(mktemp -p /tmp -d xdg-runtime-XXXXXX)" 
+export XDG_RUNTIME_DIR="$(mktemp -p /tmp -d xdg-runtime-XXXXXX)"
 
 
 export REGISTRY=localhost:5001
 export REGISTRY_TAG=latest
-export REGISTRY_ACCOUNT=""
+export REGISTRY_ORG=""
 export CONTAINER_CMD=$(which docker)
 
-# REGISTRY_ACCOUNT cannot be empty with docker
+# REGISTRY_ORG cannot be empty with docker
 if [ "${PROVIDER_NAME}" = "openstack" ]; then
-    REGISTRY_ACCOUNT=ci make push-openstack-populator-image
+    REGISTRY_ORG=ci make push-openstack-populator-image
 fi
 if [ "${PROVIDER_NAME}" = "ovirt" ]; then
-    REGISTRY_ACCOUNT=ci make push-ovirt-populator-image
+    REGISTRY_ORG=ci make push-ovirt-populator-image
 fi
 
-REGISTRY_ACCOUNT=ci make push-populator-controller-image
+REGISTRY_ORG=ci make push-populator-controller-image
 
 bazel run push-forklift-api
 bazel run push-forklift-controller

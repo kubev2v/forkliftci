@@ -9,7 +9,7 @@ jobs:
     env:
       REGISTRY: quay.io
       REGISTRY_TAG: ${{ github.head_ref || github.ref_name }}
-      REGISTRY_ACCOUNT: kubev2v
+      REGISTRY_ORG: kubev2v
       USE_BAZEL_VERSION: 5.4.0
     steps:
       - name: Check out forkliftci repository
