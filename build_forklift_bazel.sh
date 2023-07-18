@@ -32,13 +32,13 @@ export CONTAINER_CMD=$(which docker)
 
 # REGISTRY_ORG cannot be empty with docker
 if [ "${PROVIDER_NAME}" = "openstack" ]; then
-    REGISTRY_ORG=ci make push-openstack-populator-image
+    bazel run push-openstack-populator
 fi
 if [ "${PROVIDER_NAME}" = "ovirt" ]; then
-    REGISTRY_ORG=ci make push-ovirt-populator-image
+    bazel run push-ovirt-populator
 fi
 
-REGISTRY_ORG=ci make push-populator-controller-image
+bazel run push-populator-controller
 
 bazel run push-forklift-api
 bazel run push-forklift-controller
