@@ -52,15 +52,15 @@ ACTION_ENV="--action_env CONTROLLER_IMAGE=${REGISTRY}/forklift-controller:${REGI
 
 # if provider is ovirt or openstack, builder populator controller
 if [ "${PROVIDER_NAME}" = "ovirt" ] || [ "${PROVIDER_NAME}" = "openstack" ]; then
-    ACTION_ENV="$ACTION_ENV --action_env POPULATOR_CONTROLLER_IMAGE=${REGISTRY}/ci/populator-controller:${REGISTRY_TAG}"
+    ACTION_ENV="$ACTION_ENV --action_env POPULATOR_CONTROLLER_IMAGE=${REGISTRY}/populator-controller:${REGISTRY_TAG}"
 fi
 
 if [ "${PROVIDER_NAME}" = "ovirt" ]; then
-    ACTION_ENV="$ACTION_ENV --action_env OVIRT_POPULATOR_IMAGE=${REGISTRY}/ci/ovirt-populator:${REGISTRY_TAG}"
+    ACTION_ENV="$ACTION_ENV --action_env OVIRT_POPULATOR_IMAGE=${REGISTRY}/ovirt-populator:${REGISTRY_TAG}"
 fi
 
 if [ "${PROVIDER_NAME}" = "openstack" ]; then
-    ACTION_ENV="$ACTION_ENV --action_env OPENSTACK_POPULATOR_IMAGE=${REGISTRY}/ci/openstack-populator:${REGISTRY_TAG}"
+    ACTION_ENV="$ACTION_ENV --action_env OPENSTACK_POPULATOR_IMAGE=${REGISTRY}/openstack-populator:${REGISTRY_TAG}"
 fi
 
 if [ "${PROVIDER_NAME}" = "vsphere" ]; then
@@ -71,9 +71,9 @@ fi
 if [ "${PROVIDER_NAME}" = "all" ]; then
     ACTION_ENV="$ACTION_ENV --action_env VIRT_V2V_IMAGE=quay.io/kubev2v/forklift-virt-v2v-stub:${REGISTRY_TAG} \
         --action_env VIRT_V2V_DONT_REQUEST_KVM=true \
-        --action_env OVIRT_POPULATOR_IMAGE=${REGISTRY}/ci/ovirt-populator:${REGISTRY_TAG} \
-        --action_env OPENSTACK_POPULATOR_IMAGE=${REGISTRY}/ci/openstack-populator:${REGISTRY_TAG} \
-        --action_env POPULATOR_CONTROLLER_IMAGE=${REGISTRY}/ci/populator-controller:${REGISTRY_TAG}"
+        --action_env OVIRT_POPULATOR_IMAGE=${REGISTRY}/ovirt-populator:${REGISTRY_TAG} \
+        --action_env OPENSTACK_POPULATOR_IMAGE=${REGISTRY}/openstack-populator:${REGISTRY_TAG} \
+        --action_env POPULATOR_CONTROLLER_IMAGE=${REGISTRY}/populator-controller:${REGISTRY_TAG}"
 fi
 
 bazel run push-forklift-operator-bundle \
