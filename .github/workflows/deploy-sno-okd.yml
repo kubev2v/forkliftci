@@ -13,6 +13,7 @@ on:
     - cron: '30 04 * * *'
 jobs:
   build:
+    if: ( github.event_name == 'schedule' && github.repository == 'kubev2v/forkliftci' ) ||  (github.event_name != 'schedule')
     name: Deploy OKD
     runs-on: ubuntu-latest
     steps:
