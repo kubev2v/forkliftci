@@ -3,3 +3,5 @@ Scripts and tools and github-actions for creating and deploying forklift cluster
 
 * How to [install forklift on _kind_](INSTALL_FORKLIFT_ON_KIND.md).
 * How to [build kubev2v-forklift and install it on _kind_](BUILD_AND_INSTALL_FORKLIFT_ON_KIND.md)
+* CI e2e jobs  reusuable [actions](ci/README.md) 
+* okd sno deployment ansible [playbook](cluster/okd-on-ovirt/README.md).
