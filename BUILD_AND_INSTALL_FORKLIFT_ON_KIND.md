@@ -46,6 +46,7 @@ it is possible to install the following source providers as part of k8s kind clu
 - [VMware - vcsim](https://github.com/vmware/govmomi/blob/main/vcsim/README.md)
 - [OpenStack - packstack](https://github.com/kubev2v/packstack-img)
 - [oVirt - fakeovirt and ovirt-imageio](https://github.com/kubev2v/fakeovirt)
+- [OVA - NFS share setup and copying OVA files]()
 
 
 Run the script: 
@@ -63,6 +64,7 @@ when `<provider-name>` can be one of those:
         | INSTALL_NFS | install nfs server locally |  | 
    
 - vsphere
+- ova
 - all
 
 

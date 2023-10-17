@@ -18,16 +18,18 @@ case $PROVIDER_NAME in
     k8s_apply_volume_populator    
     ${SCRIPT_DIR}/vmware/setup.sh
     ${SCRIPT_DIR}/ovirt/setup.sh
-    [ ! -z "${INSTALL_NFS}" ] && ${SCRIPT_DIR}/openstack/install_nfs.sh
+    [ ! -z "${INSTALL_NFS}" ] && ${SCRIPT_DIR}/utils/install_nfs.sh
     ${SCRIPT_DIR}/openstack/setup.sh
     ${SCRIPT_DIR}/openstack/create_test_vms.sh
+    ${SCRIPT_DIR}/ova/setup.sh
+
 
     ;;
   "vsphere")
     echo "installing vsphere providers"
 
     # installs NFS for CSI
-    [ ! -z "${INSTALL_NFS}" ] && ${SCRIPT_DIR}/openstack/install_nfs.sh
+    [ ! -z "${INSTALL_NFS}" ] && ${SCRIPT_DIR}/utils/install_nfs.sh
 
     ${SCRIPT_DIR}/vmware/setup.sh
     ;;
@@ -37,7 +39,7 @@ case $PROVIDER_NAME in
     k8s_apply_volume_populator
 
     # installs NFS for CSI
-    [ ! -z "${INSTALL_NFS}" ] && ${SCRIPT_DIR}/openstack/install_nfs.sh
+    [ ! -z "${INSTALL_NFS}" ] && ${SCRIPT_DIR}/utils/install_nfs.sh
 
     ${SCRIPT_DIR}/ovirt/setup.sh
 
@@ -48,7 +50,7 @@ case $PROVIDER_NAME in
     k8s_apply_volume_populator
       
     #installs nfs for CSI and opentack volumes
-    [ ! -z "${INSTALL_NFS}" ] && ${SCRIPT_DIR}/openstack/install_nfs.sh
+    [ ! -z "${INSTALL_NFS}" ] && ${SCRIPT_DIR}/utils/install_nfs.sh
 
     #create openstack - packstack deployment
     ${SCRIPT_DIR}/openstack/setup.sh
@@ -56,6 +58,13 @@ case $PROVIDER_NAME in
     #create sample VMs and volume disks for the tests
     ${SCRIPT_DIR}/openstack/create_test_vms.sh
     ;;
+  "ova")
+    echo "installing ova providers"
+    # installs NFS for CSI
+    [ ! -z "${INSTALL_NFS}" ] && ${SCRIPT_DIR}/utils/install_nfs.sh
+
+    ${SCRIPT_DIR}/ova/setup.sh
+    ;;  
   *) 
     echo "provider ${PROVIDER_NAME} set incorrectly"
     exit 5

@@ -68,12 +68,19 @@ if [ "${PROVIDER_NAME}" = "vsphere" ]; then
         --action_env VIRT_V2V_DONT_REQUEST_KVM=true "
 fi
 
+if [ "${PROVIDER_NAME}" = "ova" ]; then
+    ACTION_ENV="$ACTION_ENV --action_env VIRT_V2V_IMAGE=quay.io/kubev2v/forklift-virt-v2v-stub:${REGISTRY_TAG} \
+        --action_env VIRT_V2V_DONT_REQUEST_KVM=true \
+        --action_env OVA_PROVIDER_SERVER_IMAGE=${REGISTRY}/forklift-ova-provider-server:${REGISTRY_TAG}"
+fi
+
 if [ "${PROVIDER_NAME}" = "all" ]; then
     ACTION_ENV="$ACTION_ENV --action_env VIRT_V2V_IMAGE=quay.io/kubev2v/forklift-virt-v2v-stub:${REGISTRY_TAG} \
         --action_env VIRT_V2V_DONT_REQUEST_KVM=true \
         --action_env OVIRT_POPULATOR_IMAGE=${REGISTRY}/ovirt-populator:${REGISTRY_TAG} \
         --action_env OPENSTACK_POPULATOR_IMAGE=${REGISTRY}/openstack-populator:${REGISTRY_TAG} \
-        --action_env POPULATOR_CONTROLLER_IMAGE=${REGISTRY}/populator-controller:${REGISTRY_TAG}"
+        --action_env POPULATOR_CONTROLLER_IMAGE=${REGISTRY}/populator-controller:${REGISTRY_TAG} \
+        --action_env OVA_PROVIDER_SERVER_IMAGE=${REGISTRY}/forklift-ova-provider-server:${REGISTRY_TAG}"
 fi
 
 bazel run push-forklift-operator-bundle \
