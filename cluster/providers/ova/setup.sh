@@ -24,7 +24,7 @@ fi
 
 
 # Downloaded the file and check if the copy was successful
-echo "The VM ova file download started."
+echo "Starting to download OVA file."
 sudo wget -P "$nfs_mount_point" "$ova_file_url"
 if [ $? -eq 0 ]; then
   echo "OVA file copied successfully to NFS share."
@@ -33,7 +33,7 @@ else
 fi
 
 # Unmount the NFS share
-umount "$nfs_mount_point"
+sudo umount "$nfs_mount_point"
 
 # deploy csi-driver-nfs
 cluster/providers/utils/deploy_csi_driver_nfs.sh "${NFS_IP_ADDRESS}" "${NFS_SHARE}"
