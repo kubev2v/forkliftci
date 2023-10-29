@@ -6,7 +6,7 @@ set -ex
 [ -z "${NFS_SHARE}" ] && { echo "Provider cannot be installed - NFS_SHARE env required" ; return 2 ;}
 
 nfs_mount_point="/tmp/ova"
-ova_file_url="https://github.com/kubev2v/forkliftci/releases/download/v8.0/vm.ova"
+ova_file_url="https://github.com/kubev2v/forkliftci/releases/download/v9.0/vm.ova"
 
 # Check if the mount point exists, and if not, create it
 if [ ! -d "$nfs_mount_point" ]; then
