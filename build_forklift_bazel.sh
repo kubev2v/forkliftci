@@ -39,7 +39,6 @@ if [ "${PROVIDER_NAME}" = "ovirt" ]; then
 fi
 if [ "${PROVIDER_NAME}" = "ova" ]; then
     bazel run push-ova-provider-server
-    bazel run --package_path=virt-v2v/cold push-forklift-virt-v2v
 fi
 
 bazel run push-populator-controller
@@ -73,7 +72,7 @@ if [ "${PROVIDER_NAME}" = "vsphere" ]; then
 fi
 
 if [ "${PROVIDER_NAME}" = "ova" ]; then
-    ACTION_ENV="$ACTION_ENV --action_env VIRT_V2V_IMAGE=${REGISTRY}/forklift-virt-v2v:${REGISTRY_TAG} \
+    ACTION_ENV="$ACTION_ENV --action_env VIRT_V2V_IMAGE=quay.io/kubev2v/forklift-virt-v2v-stub:${REGISTRY_TAG} \
         --action_env VIRT_V2V_DONT_REQUEST_KVM=true \
         --action_env OVA_PROVIDER_SERVER_IMAGE=${REGISTRY}/forklift-ova-provider-server:${REGISTRY_TAG}"
 fi
