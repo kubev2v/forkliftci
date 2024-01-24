@@ -6,6 +6,7 @@ set -ex
 [ -z "${NFS_SHARE}" ] && { echo "Provider cannot be installed - NFS_SHARE env required" ; return 2 ;}
 
 
+kubectl apply -f ./cluster/providers/vmware/vcsim_certificate.yml
 kubectl apply -f ./cluster/providers/vmware/vcsim_deployment.yml
 
 while ! kubectl get deployment -n konveyor-forklift vcsim; do sleep 5; done
