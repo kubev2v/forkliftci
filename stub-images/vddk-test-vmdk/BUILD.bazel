@@ -7,7 +7,7 @@ container_image(
     files = [
         "@cirros//file",
     ],
-    base = "//virt-v2v/cold:forklift-virt-v2v",
+    base = "//:forklift-virt-v2v",
     user = "1001",
     visibility = ["//visibility:public"],
 )

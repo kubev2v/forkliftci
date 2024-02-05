@@ -13,7 +13,7 @@ SCRIPT_DIR=`dirname "$SCRIPT_PATH"`
 
 
 # Change the dir to FORKLIFT_DIR (default forklift)
-cd ${FORKLIFT_DIR:-forklift}
+cd ${FORKLIFT_DIR:-forklift}/virt-v2v/cold
 
 [ ! -e "${SCRIPT_DIR}/stub-images" ] && { echo "stub-images not found";exit 2; }
 
