@@ -28,7 +28,7 @@ container_image(
         ":vddk-test-plugin",
         "convert_to_vmdk/tmp/cirros.vmdk",
     ],
-    base = "@ubi8-minimal//image",
+    base = "@ubi9-minimal//image",
     user = "1001",
     visibility = ["//visibility:public"],
 )
