@@ -5,7 +5,7 @@ load(
 
 container_image(
     name = "forklift-virt-v2v-stub",
-    base = "//virt-v2v:forklift-virt-v2v",
+    base = "//virt-v2v/cold:forklift-virt-v2v",
     directory = "/usr/local/bin/",
     empty_dirs = ["/disks"],
     entrypoint = ["/usr/local/bin/entrypoint"],
