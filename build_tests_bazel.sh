@@ -21,5 +21,5 @@ export REGISTRY_TAG=latest
 
 # Copy the stub-images under the bazel workspace
 cp -fr ${SCRIPT_DIR}/stub-images virt-v2v/cold
-bazel run -package_path=virt-v2v/cold stub-images:push-forklift-virt-v2v-stub --verbose_failures
-bazel run -package_path=virt-v2v/cold stub-images:push-vddk-test-vmdk --verbose_failures
+bazel run --package_path=virt-v2v/cold stub-images:push-forklift-virt-v2v-stub --verbose_failures
+bazel run --package_path=virt-v2v/cold stub-images:push-vddk-test-vmdk --verbose_failures
