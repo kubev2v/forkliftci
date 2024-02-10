@@ -1,0 +1,27 @@
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_image",
+)
+load("@io_bazel_rules_docker//docker/util:run.bzl", "container_run_and_commit_layer")
+
+container_run_and_commit_layer(
+    name = "ova-repository",
+    commands = [
+        "dnf -y install nfs-utils wget",
+        "mkdir -p /home/nfsshare",
+        "chmod 777 /home/nfsshare",
+        "echo '/home/nfsshare  *(insecure,rw,no_root_squash)' >>/etc/exports",
+	"cd /home/nfsshare",
+	"wget https://github.com/kubev2v/forkliftci/releases/download/v9.0/vm.ova",
+	"systemctl enable nfs-server",
+    ],
+    image = "@centos-stream-9//image",
+)
+
+container_image(
+    name = "ova-nfs-server",
+    base = "@centos-stream-9//image",
+    layers = [":ova-repository"],
+    user = "1001",
+    visibility = ["//visibility:public"],
+)

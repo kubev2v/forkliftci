@@ -21,3 +21,12 @@ container_push(
     repository = "$${REGISTRY_ORG:-}$${REGISTRY_ORG:+/}vddk-test-vmdk",
     tag = "$${REGISTRY_TAG:-devel}",
 )
+
+container_push(
+    name = "push-forkliftci-ova-nfs",
+    format = "Docker",
+    image = "//stub-images/ova-nfs:ova-nfs-server",
+    registry = "$${REGISTRY:-quay.io}",
+    repository = "$${REGISTRY_ORG:-}$${REGISTRY_ORG:+/}forkliftci-ova-nfs",
+    tag = "$${REGISTRY_TAG:-devel}",
+)

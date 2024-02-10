@@ -23,3 +23,4 @@ export REGISTRY_TAG=latest
 cp -fr ${SCRIPT_DIR}/stub-images virt-v2v/cold
 bazel run --strategy_regexp="RunAndCommitLayer stub-images/virt-v2v-stub/qemu-img-layer.tar"=processwrapper-sandbox --package_path=virt-v2v/cold stub-images:push-forklift-virt-v2v-stub --verbose_failures
 bazel run --strategy_regexp="Action stub-images/vddk-test-vmdk/convert_to_vmdk/tmp/cirros.vmdk"=processwrapper-sandbox --package_path=virt-v2v/cold stub-images:push-vddk-test-vmdk --verbose_failures
+bazel run --strategy_regexp="RunAndCommitLayer stub-images/ova-nfs/ova-repository-layer.tar"=processwrapper-sandbox --package_path=virt-v2v/cold stub-images:push-forkliftci-ova-nfs --verbose_failures
