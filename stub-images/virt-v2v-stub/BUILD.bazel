@@ -7,7 +7,7 @@ load("@io_bazel_rules_docker//docker/util:run.bzl", "container_run_and_commit_la
 container_run_and_commit_layer(
     name = "qemu-img",
     commands = [
-        "dnf -y install qemu-img",
+        "dnf -y install qemu-img file",
     ],
     image = "@centos-stream-9//image",
 )
