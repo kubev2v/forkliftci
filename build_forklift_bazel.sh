@@ -46,7 +46,9 @@ bazel run push-populator-controller
 bazel run push-forklift-api
 bazel run push-forklift-controller
 bazel run push-forklift-validation
-bazel run push-forklift-operator
+
+# forklift-operator is not built with bazel
+make push-forklift-operator
 
 ACTION_ENV="--action_env CONTROLLER_IMAGE=${REGISTRY}/forklift-controller:${REGISTRY_TAG} \
     --action_env VALIDATION_IMAGE=${REGISTRY}/forklift-validation:${REGISTRY_TAG} \
