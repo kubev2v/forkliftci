@@ -46,11 +46,13 @@ bazel run push-populator-controller
 bazel run push-forklift-api
 bazel run push-forklift-controller
 bazel run push-forklift-validation
-bazel run push-forklift-operator
+
+# forklift-operator is not built with bazel
+REGISTRY_ORG=ci make push-operator-image
 
 ACTION_ENV="--action_env CONTROLLER_IMAGE=${REGISTRY}/forklift-controller:${REGISTRY_TAG} \
     --action_env VALIDATION_IMAGE=${REGISTRY}/forklift-validation:${REGISTRY_TAG} \
-    --action_env OPERATOR_IMAGE=${REGISTRY}/forklift-operator:${REGISTRY_TAG} \
+    --action_env OPERATOR_IMAGE=${REGISTRY}/ci/forklift-operator:${REGISTRY_TAG} \
     --action_env API_IMAGE=${REGISTRY}/forklift-api:${REGISTRY_TAG}"
 
 # if provider is ovirt or openstack, builder populator controller
@@ -89,7 +91,7 @@ fi
 bazel run push-forklift-operator-bundle \
     --action_env CONTROLLER_IMAGE=${REGISTRY}/forklift-controller:${REGISTRY_TAG} \
     --action_env VALIDATION_IMAGE=${REGISTRY}/forklift-validation:${REGISTRY_TAG} \
-    --action_env OPERATOR_IMAGE=${REGISTRY}/forklift-operator:${REGISTRY_TAG} \
+    --action_env OPERATOR_IMAGE=${REGISTRY}/ci/forklift-operator:${REGISTRY_TAG} \
     --action_env API_IMAGE=${REGISTRY}/forklift-api:${REGISTRY_TAG} \
     ${ACTION_ENV}
 
