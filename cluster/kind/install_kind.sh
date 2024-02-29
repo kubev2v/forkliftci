@@ -1,6 +1,6 @@
 #!/bin/sh
 
-go install sigs.k8s.io/kind@v0.15.0
+go install sigs.k8s.io/kind@v0.22.0
 
 mkdir -p /var/tmp/kind_storage
 chmod 777 /var/tmp/kind_storage
