@@ -218,12 +218,25 @@ function packstack_create_cirros_volume {
     openstack volume create --image cirros --size 1 cirros-volume
 
     # wait for the volume to be created
-    sleep 10
+    while [ "$(openstack volume show -f value -c status cirros-volume)" != "available" ]; do
+        echo "waiting for volume to be created"
+        sleep 3
+    done
 
-    # boot VM instance from volume
-    openstack server create --flavor m1.tiny --volume cirros-volume cirros-volume
-    sleep 15
-    openstack volume list 
+    # boot VM instance from image
+    openstack server create --image cirros --flavor m1.tiny --wait cirros-server
+
+    # wait for the server to be created
+    while [ "$(openstack server show -f value -c status cirros-server)" != "ACTIVE" ]; do
+        echo "waiting for server to be created"
+        sleep 3
+    done
+
+    # attach the cirros-volume to the server
+    echo "attaching volume to server"
+    openstack server add volume cirros-server cirros-volume
+
+    openstack volume list
     openstack server list
 }
 
