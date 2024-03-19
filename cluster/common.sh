@@ -28,7 +28,7 @@ function k8s_grant_permissions {
 
 # workaround to https://github.com/kubevirt/kubevirt/issues/7078
 function k8s_patch_storage_profile {
-    kubectl patch --type merge -p '{"spec": {"claimPropertySets": [{"accessModes": ["ReadWriteOnce"]}]}}' StorageProfile standard
+    kubectl patch --type merge -p '{"spec": {"claimPropertySets": [{ "volumeMode": "Filesystem", "accessModes": ["ReadWriteOnce"]}]}}' StorageProfile standard
 }
 
 function k8s_apply_volume_populator {
