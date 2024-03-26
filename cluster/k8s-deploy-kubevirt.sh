@@ -3,19 +3,19 @@
 set -ex
 
 # Install CDI
-[ ! -v CDI_VERSION ] && export CDI_VERSION=v1.55.2
+[ ! -v CDI_VERSION ] && export CDI_VERSION=v1.58.3
 kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/$CDI_VERSION/cdi-operator.yaml
 kubectl create -f https://github.com/kubevirt/containerized-data-importer/releases/download/$CDI_VERSION/cdi-cr.yaml
 
 # Install CNA
-export CNA_VERSION=v0.78.0
+export CNA_VERSION=v0.91.0
 #$(curl -s https://api.github.com/repos/kubevirt/cluster-network-addons-operator/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 kubectl apply -f https://github.com/kubevirt/cluster-network-addons-operator/releases/download/$CNA_VERSION/namespace.yaml
 kubectl apply -f https://github.com/kubevirt/cluster-network-addons-operator/releases/download/$CNA_VERSION/network-addons-config.crd.yaml
 kubectl apply -f https://github.com/kubevirt/cluster-network-addons-operator/releases/download/$CNA_VERSION/operator.yaml
 
 # Install kubevirt
-export VIRT_VERSION=v0.58.1
+export VIRT_VERSION=v1.2.0
 #$(curl -s https://api.github.com/repos/kubevirt/kubevirt/releases | grep tag_name | grep -v -- '-rc' | sort -r | head -1 | awk -F': ' '{print $2}' | sed 's/,//' | xargs)
 kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/${VIRT_VERSION}/kubevirt-operator.yaml
 kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/${VIRT_VERSION}/kubevirt-cr.yaml
