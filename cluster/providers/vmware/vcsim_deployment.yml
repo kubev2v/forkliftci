@@ -17,7 +17,7 @@ spec:
       containers:
       - name: vcsim
         command: ["/vcsim", "-l", "0.0.0.0:8989", "-tlscert", "/etc/secret/tls.crt", "-tlskey", "/etc/secret/tls.key"]
-        image: docker.io/vmware/vcsim:latest
+        image: docker.io/vmware/vcsim:v0.37.3
         ports:
         - containerPort: 8989
         volumeMounts:

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: vcsim
-        image: docker.io/vmware/vcsim:latest
+        image: docker.io/vmware/vcsim:v0.37.3
         ports:
         - containerPort: 8989
       - name: govc
