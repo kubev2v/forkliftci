@@ -267,6 +267,7 @@ spec:
   inventory_tls_enabled: true
   validation_tls_enabled: false
   must_gather_api_tls_enabled: false
+  virt_v2v_dont_request_kvm: true
   ui_tls_enabled: false
 EOF
 

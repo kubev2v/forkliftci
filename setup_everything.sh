@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. ./kind/install_kind.sh
+. ./cluster/kind/install_kind.sh
 
 ./cluster/k8s-deploy-forklift.sh
 

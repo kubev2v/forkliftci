@@ -12,7 +12,7 @@ source ./cluster/common.sh
 . ./cluster/kind/kind_with_registry.sh
 
 # clone the forklift repo
-./cluster/get_forklift_bazel.sh
+./cluster/get_forklift.sh
 
 # deploy kubevirt
 ./cluster/k8s-deploy-kubevirt.sh

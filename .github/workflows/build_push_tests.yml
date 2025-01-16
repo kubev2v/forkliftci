@@ -10,7 +10,6 @@ jobs:
       REGISTRY: quay.io
       REGISTRY_TAG: ${{ github.head_ref || github.ref_name }}
       REGISTRY_ORG: kubev2v
-      USE_BAZEL_VERSION: 5.4.0
     steps:
       - name: Check out forkliftci repository
         uses: actions/checkout@v3
@@ -30,15 +29,6 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
-
-      - name: Bazel cache
-        id: bazel-cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-cache-${{ hashFiles('WORKSPACE') }}
-
-      #- run: cd forklift/ && bazel sync --configure
 
       # this is required by nbdkit plugin compiler
       - run: sudo apt-get install -y nbdkit-plugin-dev

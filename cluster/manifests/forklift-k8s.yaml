@@ -13,7 +13,7 @@ spec:
   displayName: Forklift Operator
   publisher: Konveyor
   sourceType: grpc
-  image: localhost:5001/forklift-operator-index:latest
+  image: localhost:5001/kubev2v/forklift-operator-index:latest
 ---
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup

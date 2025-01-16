@@ -28,13 +28,6 @@ runs:
         repository: kubev2v/forklift
         path: forklift
 
-    - name: Bazel cache
-      id: bazel-cache
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/bazel
-        key: ${{ runner.os }}-bazel-cache-${{ hashFiles('forklift/WORKSPACE') }}
-
     - run: echo "${{ github.action_path }}" >> $GITHUB_PATH
       shell: bash
 
@@ -49,7 +42,7 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.gh_access_token }}
 
-    - name: Build and setup everything with bazel
+    - name: Build and setup everything
       shell: bash
       run: |
         echo $GITHUB_WORKSPACE

@@ -30,4 +30,5 @@ spec:
   validation_container_requests_cpu: "50m"
   controller_container_requests_cpu: "50m"
   api_container_requests_cpu: "50m"
+  virt_v2v_dont_request_kvm: true
 EOF

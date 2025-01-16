@@ -33,6 +33,7 @@ spec:
   validation_tls_enabled: false
   must_gather_api_tls_enabled: false
   ui_tls_enabled: false
+  virt_v2v_dont_request_kvm: true
 EOF
 
 echo Forklift: $FORK_RELEASE
